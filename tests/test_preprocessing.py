@@ -25,6 +25,7 @@ from src.data.preprocessing import (
     mask_to_tensor,
     patch_grid,
     resize_image,
+    normalize_imagenet,
 )
 
 
@@ -92,9 +93,16 @@ def test_gray_source_unchanged_for_pca():
 
 
 def test_patchcore_uses_imagenet_stats(cfg):
-    img = build_dataset(cfg, "patchcore", "train", "fake_rgb")[0]["image"]
-    # uniform noise in [0,1] standardised with ImageNet stats -> roughly (-2.1, 2.7)
-    assert img.min() < -1.5 and img.max() > 1.5
+    ds = build_dataset(cfg, "patchcore", "train", "fake_rgb")
+    item = ds[0]
+    raw_image = ds.raw[0]["image"]
+    expected = normalize_imagenet(
+        resize_image(image_to_tensor(raw_image, grayscale=False), 256)
+    )
+    # Check the actual pipeline output against the documented ImageNet transform.
+    # Do not assert fixed extrema: anti-aliased resizing changes pixel extremes.
+    assert torch.allclose(item["image"], expected, atol=1e-6)
+    assert item["image"].min() < 0.0 and item["image"].max() > 0.0
 
 
 def test_masks_are_binary_and_normals_are_empty(cfg):
