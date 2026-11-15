@@ -2,13 +2,20 @@ seed: 42
 data:
   root: data/mvtec_anomaly_detection
   category: bottle
-  image_size: 256
-  grayscale: false
+  val_fraction: 0.10       # held out from train/good only
+  image_size: 256          # default for methods that do not set their own
+  grayscale: false         # legacy key; each method below now sets its own
+  mask_resize: nearest     # nearest | max  (max keeps tiny defects when downsampling)
 pca:
+  image_size: 256
+  grayscale: true          # methodology: global PCA works on luminance
   n_components: 0.95
   patch_size: 32
-  stride: 16
+  stride: 16               # (image_size - patch_size) must be divisible by stride
 autoencoder:
+  image_size: 256          # must be divisible by 2**number of stride-2 stages
+  grayscale: false
+  divisible_by: 32
   epochs: 50
   batch_size: 16
   learning_rate: 0.001
@@ -16,7 +23,7 @@ autoencoder:
 patchcore:
   backbone: wide_resnet50_2
   pretrained: true
-  image_size: 256
+  image_size: 256          # resized directly, no centre crop
   memory_bank_max_samples: 10000
   neighbours: 1
 evaluation:
