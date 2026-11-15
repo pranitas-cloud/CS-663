@@ -39,7 +39,7 @@ class PatchPCA:
     """
 
     def __init__(self, patch_size=32, stride=16, n_components=0.95,
-                 max_train_patches=50000, random_state=42, eps=1e-12):
+                 max_train_patches=10000, random_state=42, eps=1e-12):
         if patch_size < 1 or stride < 1:
             raise ValueError("patch_size and stride must be positive.")
         if isinstance(n_components, float) and not (0.0 < n_components <= 1.0):
@@ -97,8 +97,11 @@ class PatchPCA:
 
         self.mean_ = flat.mean(axis=0)
         centered = flat - self.mean_
-        gram = centered @ centered.T
-        eigvals, eigvecs = np.linalg.eigh(gram)
+        # Patch vectors are 1,024-D with the current 32x32 grayscale setup.
+        # Eigendecompose the feature covariance (D,D), not the much larger
+        # patch Gram matrix (M,M), where M can be thousands of patches.
+        covariance = centered.T @ centered
+        eigvals, eigvecs = np.linalg.eigh(covariance)
         order = np.argsort(eigvals)[::-1]
         eigvals = np.maximum(eigvals[order], 0.0)
         eigvecs = eigvecs[:, order]
@@ -107,7 +110,8 @@ class PatchPCA:
         if eigvals.size == 0:
             raise ValueError("Training patches have no measurable variance.")
 
-        components = (eigvecs.T @ centered) / np.sqrt(eigvals[:, None])
+        # Eigenvectors of the feature covariance are the PCA directions.
+        components = eigvecs.T
         components /= np.maximum(np.linalg.norm(components, axis=1, keepdims=True), self.eps)
         ratios = eigvals / eigvals.sum()
         if isinstance(self.n_components, float):
