@@ -86,3 +86,26 @@ These commands are minimal smoke-test entry points, not final benchmark runs. Tu
 - Avoid tuning on test masks. Use training-only decisions or a clearly separated validation protocol.
 
 See [docs/methodology.md](docs/methodology.md), [docs/experiments.md](docs/experiments.md), and [docs/references.md](docs/references.md).
+
+
+## Completed experiments (November 2026)
+
+### PatchCore — Anomalib run
+
+The completed 15-category run used Anomalib 2.7.0 with PyTorch 2.11.0+cu130, an ImageNet-pretrained `wide_resnet50_2` backbone, feature layers `layer2` and `layer3`, coreset sampling ratio 0.10, and 9 nearest neighbours. Batch sizes were 8 for training and evaluation, with 0 data-loader workers and random seed 42. The run took 38.99 minutes in total.
+
+Macro metrics are recorded in [results/tables/patchcore_anomalib_macro.csv](results/tables/patchcore_anomalib_macro.csv), with category-level values in [results/tables/patchcore_anomalib_categories.csv](results/tables/patchcore_anomalib_categories.csv).
+
+### MemAE — memory-augmented reconstruction run
+
+A separate MemAE implementation was trained independently for all 15 MVTec AD categories, using only normal training images and a held-out normal validation subset for threshold calibration. Inputs were resized to 256×256. The run used a memory size of 256, hard-shrinkage threshold 1e-3, temperature 0.07, maximum 40 epochs, early-stopping patience 8, batch size 16, learning rate 1e-3, and seed 42. Total measured category runtime was approximately 54.97 minutes.
+
+Macro metrics are recorded in [results/tables/memae_macro.csv](results/tables/memae_macro.csv), and category-level AUROC/F1/runtime values are in [results/tables/memae_categories.csv](results/tables/memae_categories.csv).
+
+### Interpretation and comparability
+
+- PatchCore's recorded macro image AUROC and pixel AUROC were 0.9823 and 0.9801. Its recorded image F1 and pixel F1 were 0.9715 and 0.5801.
+- MemAE's recorded macro image AUROC, image AP, image F1, pixel AUROC, pixel AP and pixel F1 were 0.6722, 0.8415, 0.4254, 0.7381, 0.1448 and 0.1252.
+- F1 thresholds and evaluation implementations were not established to be identical across these two runs. Treat AUROC/AP as the cleaner ranking comparisons; interpret F1 cautiously.
+- A post-hoc MemAE image-score ablation found maximum pixel error gave macro image AUROC 0.6967 and image AP 0.8535, compared with 0.6722 and 0.8415 for the original top-1%-mean score. This was exploratory and selected after inspecting test performance; it is not the primary reported MemAE result.
+- Model checkpoints, prediction maps and raw category artifacts are stored in the associated Google Drive experiment folders, not in Git. This repository contains concise result tables and experiment metadata only.
