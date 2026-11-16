@@ -1,127 +1,206 @@
 # Industrial Anomaly Detection
 
-**CS 663 — Digital Image Processing | Project**
+**CS 663 — Digital Image Processing | Course project**
 
-A reproducible study of unsupervised industrial visual anomaly detection on [MVTec AD](https://www.mvtec.com/company/research/datasets/mvtec-ad). The project compares three complementary approaches:
+This repository studies unsupervised industrial anomaly detection and pixel-level defect localization on the MVTec Anomaly Detection (MVTec AD) benchmark.
 
-1. **PCA reconstruction** — fit a low-dimensional normality model using only defect-free training images.
-2. **Convolutional autoencoder** — train an encoder-decoder from scratch to reconstruct normal images.
-3. **PatchCore-style detector** — extract pretrained CNN patch features, build a normal-feature memory bank, and score test patches using nearest neighbours.
+## Methods and experiment tracks
 
-The project evaluates image-level detection and pixel-level localization, then studies which defect characteristics are associated with successes and failures.
+The repository contains both project implementations and completed benchmark notebooks. These are related, but not all use the same implementation:
 
-## Research questions
+| Track | Implementation | Status |
+|---|---|---|
+| Global PCA | Repository code and experiment notebooks | Baseline |
+| Patch PCA | Repository code and experiment notebooks | Baseline |
+| Convolutional autoencoder | Repository code and experiment notebooks | Baseline |
+| PatchCore-style prototype | `src/patchcore/` | Local implementation; uses random memory-bank sampling |
+| PatchCore benchmark | Anomalib 2.7.0 in the full Kaggle notebook | Completed 15-category run |
+| MemAE | Project implementation in `src/memae/` and full Kaggle notebook | Completed 15-category run |
 
-- How do reconstruction-based and feature-memory approaches compare on image-level detection and pixel-level localization?
-- How do PCA dimension, autoencoder capacity, feature layers, memory-bank size and nearest-neighbour settings affect results?
-- How do defect size, contrast, texture, shape and location relate to detection/localization performance?
-- Which failure modes are shared across methods, and which are method-specific?
+**Important implementation distinction:** the reported PatchCore benchmark in the results tables was run using Anomalib 2.7.0. The separate `src/patchcore/` prototype is not an exact reproduction of Anomalib PatchCore: its current memory-bank sampler is random rather than greedy coreset selection. Do not attribute the Anomalib benchmark metrics to the local prototype.
+
+The project evaluates image-level anomaly detection and pixel-level localization. The experiment protocol uses defect-free training images; official test images and masks are held back for evaluation.
 
 ## Repository layout
 
 ```text
-configs/       Experiment configuration
-data/          Dataset instructions (raw data is not committed)
-src/data/      MVTec loading and preprocessing
-src/pca/       Global and patch PCA baselines
-src/autoencoder/ CNN autoencoder and training loop
-src/patchcore/ Feature extraction, memory bank and detector
-src/evaluation/ Metrics and visualizations
-src/analysis/  Defect-property and failure analysis
-notebooks/     Ordered experiment notebooks
-experiments/   Run outputs/checkpoints (ignored by git)
-results/       Generated maps, plots and tables (ignored by git)
-docs/          Methodology, experiment protocol and references
+configs/                 Experiment configuration files
+data/                    Dataset instructions; raw MVTec data is not committed
+docs/                    Methodology, results, references and reproduction notes
+experiments/              Local run outputs (ignored by Git)
+notebooks/                Exploration, baseline, and full benchmark notebooks
+results/                  Committed result tables; generated artifacts are ignored
+scripts/                  Dataset validation utilities
+src/data/                 MVTec loading and preprocessing
+src/pca/                  Global and patch PCA components
+src/autoencoder/          Convolutional autoencoder baseline
+src/patchcore/            Local PatchCore-style prototype
+src/memae/                Memory-augmented autoencoder model
+src/evaluation/           Evaluation metrics and visualization helpers
+src/analysis/             Defect-property and failure analysis
+tests/                    Synthetic-data unit tests
 ```
 
-## Setup
+## 1. Environment setup
 
-Python 3.10+ is recommended.
+Use Python 3.11 for the tested CI workflow. Python 3.10+ is supported by the package metadata.
 
 ```bash
 git clone https://github.com/pranitas-cloud/CS-663.git
 cd CS-663
 python -m venv .venv
-source .venv/bin/activate        # Windows: .venv\\Scripts\\activate
-pip install -r requirements.txt
-pip install -e .
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements-dev.txt
+python -m pip install -e .
 ```
 
-For a CUDA-enabled PyTorch installation, install the build matching your CUDA version from the [official PyTorch selector](https://pytorch.org/get-started/locally/).
+For Windows PowerShell, activate the environment with:
 
-## Dataset
+```powershell
+.venv\Scripts\Activate.ps1
+```
 
-Download and extract MVTec AD yourself; see [data/README.md](data/README.md). Expected layout:
+The base requirements install PyTorch and the CPU-compatible package set resolved for your platform. For GPU runs, install the matching PyTorch/Torchvision build using the [official PyTorch installation selector](https://pytorch.org/get-started/locally/), then install the remaining project dependencies. GPU driver, CUDA runtime, and wheel compatibility depend on the machine.
+
+The Anomalib PatchCore benchmark has a separate pinned dependency file:
+
+```bash
+python -m pip install -r requirements-anomalib.txt
+```
+
+The full Kaggle notebook also installs Anomalib 2.7.0 in its setup cell. Do not install Anomalib into the baseline CPU CI environment unless running that benchmark.
+
+## 2. Obtain and validate MVTec AD
+
+1. Download **MVTec AD** (not MVTec AD 2) from the [official MVTec dataset page](https://www.mvtec.com/research-teaching/datasets/mvtec-ad).
+2. Review the dataset's CC BY-NC-SA 4.0 terms before use or redistribution.
+3. Extract it so the directory directly contains the 15 category folders.
+4. Place the extracted folder at `data/mvtec_anomaly_detection/`, or provide its location to the validator/notebook.
+
+Expected structure:
 
 ```text
 data/mvtec_anomaly_detection/
   bottle/
     train/good/
     test/good/
-    test/broken_large/
-    ground_truth/broken_large/
+    test/<defect_type>/
+    ground_truth/<defect_type>/
+  cable/
+  capsule/
   ...
+  zipper/
 ```
 
-Do not commit the dataset. Set `data.root` in `configs/default.yaml` or pass `--data-root` to scripts.
-
-## First checks
+Validate the entire dataset:
 
 ```bash
-python -m src.data.dataset --data-root data/mvtec_anomaly_detection --category bottle
-python -m src.pca.global_pca --data-root data/mvtec_anomaly_detection --category bottle
-python -m src.autoencoder.train --data-root data/mvtec_anomaly_detection --category bottle --epochs 2
-python -m src.patchcore.detector --data-root data/mvtec_anomaly_detection --category bottle
+python scripts/validate_dataset.py --data-root data/mvtec_anomaly_detection
 ```
 
-These commands are minimal smoke-test entry points, not final benchmark runs. Tune settings in the config and record every run's parameters.
+Validate a single category:
 
-## Methodological notes
+```bash
+python scripts/validate_dataset.py --data-root data/mvtec_anomaly_detection --category bottle
+```
 
-- Training uses only the MVTec `train/good` split. Test images and masks are reserved for evaluation.
-- Metrics are computed per category and then macro-averaged; report both image AUROC and pixel AUROC. Add AUPRO if the final protocol supports it.
-- The PCA implementation is a transparent baseline over resized grayscale images. Global PCA may miss small/localized defects; patch PCA is included to test local modelling.
-- The autoencoder is trained from scratch. Reconstruction error is a baseline anomaly score, not a calibrated probability.
-- PatchCore uses ImageNet-pretrained Wide ResNet features by default. The feature extractor is pretrained; patch aggregation, memory bank and scoring are implemented in this repository.
-- Avoid tuning on test masks. Use training-only decisions or a clearly separated validation protocol.
+The validator checks the expected category folders, readable square PNG images, and the presence and dimensions of defect masks. It does not download the dataset or replace the official evaluation code.
 
-See [docs/methodology.md](docs/methodology.md), [docs/experiments.md](docs/experiments.md), and [docs/references.md](docs/references.md).
+**Do not commit MVTec images, masks, archives, or derived visualizations containing dataset imagery.** The dataset is separately licensed and is not covered by this repository's MIT license. The repository's `.gitignore` excludes local data and experiment artifacts.
 
+See [data/README.md](data/README.md) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for dataset terms and attribution.
 
-## Completed experiments (November 2026)
+## 3. Run tests
 
-### PatchCore — Anomalib run
+The tests create small synthetic MVTec-style folders; they do not require the real MVTec dataset or a GPU.
 
-The completed 15-category run used Anomalib 2.7.0 with PyTorch 2.11.0+cu130, an ImageNet-pretrained `wide_resnet50_2` backbone, feature layers `layer2` and `layer3`, coreset sampling ratio 0.10, and 9 nearest neighbours. Batch sizes were 8 for training and evaluation, with 0 data-loader workers and random seed 42. The run took 38.99 minutes in total.
+```bash
+python -m pytest -q
+```
 
-Macro metrics are recorded in [results/tables/patchcore_anomalib_macro.csv](results/tables/patchcore_anomalib_macro.csv), with category-level values in [results/tables/patchcore_anomalib_categories.csv](results/tables/patchcore_anomalib_categories.csv).
+Or use the Makefile:
 
-### MemAE — memory-augmented reconstruction run
+```bash
+make test
+make validate-data
+```
 
-A separate MemAE implementation was trained independently for all 15 MVTec AD categories, using only normal training images and a held-out normal validation subset for threshold calibration. Inputs were resized to 256×256. The run used a memory size of 256, hard-shrinkage threshold 1e-3, temperature 0.07, maximum 40 epochs, early-stopping patience 8, batch size 16, learning rate 1e-3, and seed 42. Total measured category runtime was approximately 54.97 minutes.
+GitHub Actions runs the same CPU test suite on pushes to `main`, pull requests, and manual dispatches. A green CI run validates the tested code paths; it does not mean that the 15-category GPU benchmarks have been re-run.
 
-Macro metrics are recorded in [results/tables/memae_macro.csv](results/tables/memae_macro.csv), and category-level AUROC/F1/runtime values are in [results/tables/memae_categories.csv](results/tables/memae_categories.csv).
+## 4. Reproduce the full benchmark runs
 
-### Interpretation and comparability
+The two completed 15-category runs are supplied as self-contained Kaggle notebooks:
 
-- PatchCore's recorded macro image AUROC and pixel AUROC were 0.9828 and 0.9801. Its recorded image F1 and pixel F1 were 0.9715 and 0.5806.
-- MemAE's recorded macro image AUROC, image AP, image F1, pixel AUROC, pixel AP and pixel F1 were 0.6722, 0.8415, 0.4254, 0.7381, 0.1448 and 0.1252.
-- F1 thresholds and evaluation implementations were not established to be identical across these two runs. Treat AUROC/AP as the cleaner ranking comparisons; interpret F1 cautiously.
-- A post-hoc MemAE image-score ablation found maximum pixel error gave macro image AUROC 0.6967 and image AP 0.8535, compared with 0.6722 and 0.8415 for the original top-1%-mean score. This was exploratory and selected after inspecting test performance; it is not the primary reported MemAE result.
-- Model checkpoints, prediction maps and raw category artifacts are stored in the associated Google Drive experiment folders, not in Git. This repository contains concise result tables and experiment metadata only.
+- [PatchCore — Anomalib 2.7.0 full run](notebooks/04_patchcore_kaggle_full_run.ipynb)
+- [MemAE — full training and evaluation run](notebooks/06_memae_kaggle_full_run.ipynb)
 
+To reproduce them:
 
-## Experiment notebooks
+1. Open the relevant notebook in Kaggle.
+2. Attach a copy of MVTec AD that you obtained in accordance with its license. The notebook searches Kaggle input mounts for the dataset folder or archive; check the dataset-discovery cell if your mount uses a nonstandard layout.
+3. Select a GPU accelerator for practical full-run execution.
+4. Run the notebook from the first cell. The PatchCore notebook runs a one-category pilot before proceeding through all categories.
+5. Keep the generated outputs from `/kaggle/working`; download or back them up before the Kaggle session ends.
 
-- [PatchCore Anomalib run record](notebooks/05_patchcore_anomalib_record.ipynb) — recorded settings, category metrics and interpretation for the completed Anomalib 2.7.0 run.
-- [MemAE experiment record](notebooks/06_memae_experiment_record.ipynb) — MemAE architecture, recorded configuration, category metrics and interpretation. The reusable memory autoencoder module is in `src/memae/model.py`.
+The MemAE notebook's Google Drive backup is optional. Training and evaluation run locally in the Kaggle session without a `GDRIVE_TOKEN`; Drive is only an optional backup/resume destination.
 
-The full Kaggle execution notebooks and raw run artifacts are retained separately in the experiment Google Drive backups. The full Kaggle execution notebooks are included alongside concise experiment-record notebooks. They require the MVTec AD dataset to be attached in Kaggle; MemAE also uses the Kaggle secret `GDRIVE_TOKEN` for optional Drive backup.
+The full notebooks record their hyperparameters, category-level metrics, thresholds, runtime and visualizations. Exact runtime and numerical reproducibility can vary with GPU model, library build, and nondeterministic accelerator kernels. Use the committed result tables as the original run record, not as a promise that every machine will reproduce every decimal.
 
+## 5. Reported results
 
-### Full Kaggle execution notebooks
+### PatchCore — Anomalib 2.7.0
 
-- [PatchCore — full Anomalib 2.7.0 run](notebooks/04_patchcore_kaggle_full_run.ipynb)
-- [MemAE — full 15-category training and evaluation run](notebooks/06_memae_kaggle_full_run.ipynb)
+The completed run covered all 15 categories. It used ImageNet-pretrained `wide_resnet50_2`, feature layers `layer2` and `layer3`, coreset sampling ratio 0.10, 9 nearest neighbours, train/evaluation batch sizes of 8, 0 data-loader workers, and seed 42. The recorded total runtime was 38.99 minutes.
 
-The MemAE execution notebook's qualitative visualisation cell selects one normal example and one example per defect subtype. Its predicted-mask overlay only colours predicted anomalous pixels. Existing experiment figures were generated by the earlier run; regenerate them with the updated function if refreshed subtype-complete figures are needed.
+Macro results:
+
+| Metric | Macro score |
+|---|---:|
+| Image AUROC | 0.982848 |
+| Image F1 | 0.971479 |
+| Pixel AUROC | 0.980105 |
+| Pixel F1 | 0.580585 |
+
+Full data: [category metrics](results/tables/patchcore_anomalib_categories.csv) · [macro metrics](results/tables/patchcore_anomalib_macro.csv)
+
+### MemAE — project implementation
+
+The completed run trained one model per category using normal training images, with a held-out normal validation subset. Inputs were resized to 256×256. The recorded setup used memory size 256, hard-shrinkage threshold 1e-3, temperature 0.07, maximum 40 epochs, early-stopping patience 8, batch size 16, learning rate 1e-3, weight decay 1e-5, and seed 42. The total measured category runtime was approximately 54.97 minutes.
+
+| Metric | Macro score |
+|---|---:|
+| Image AUROC | 0.672232 |
+| Image AP | 0.841480 |
+| Image F1 | 0.425354 |
+| Pixel AUROC | 0.738080 |
+| Pixel AP | 0.144815 |
+| Pixel F1 | 0.125190 |
+
+Full data: [category metrics](results/tables/memae_categories.csv) · [macro metrics](results/tables/memae_macro.csv)
+
+F1 thresholds and evaluation implementations were not established to be identical across the PatchCore and MemAE runs. Interpret F1 comparisons cautiously. The post-hoc MemAE image-score ablation is exploratory and is not the primary reported result.
+
+See [docs/completed_experiments_nov2026.md](docs/completed_experiments_nov2026.md) for the experiment record and [docs/methodology.md](docs/methodology.md) for methodology details.
+
+## 6. Notebooks
+
+- [01 — Dataset exploration](notebooks/01_dataset_exploration.ipynb)
+- [01b — Fast preprocessing audit](notebooks/01b_preprocessing_audit_fast.ipynb)
+- [02 — PCA experiments](notebooks/02_pca_experiments.ipynb)
+- [02b — Patch PCA experiments](notebooks/02b_patch_pca_experiments.ipynb)
+- [03 — Autoencoder experiments](notebooks/03_autoencoder_experiments.ipynb)
+- [04 — PatchCore experiment placeholder/prototype notebook](notebooks/04_patchcore_experiments.ipynb)
+- [05 — PatchCore Anomalib run record](notebooks/05_patchcore_anomalib_record.ipynb)
+- [06 — MemAE experiment record](notebooks/06_memae_experiment_record.ipynb)
+
+The record notebooks are concise summaries. The two full Kaggle notebooks linked above are the execution artifacts for the completed Anomalib PatchCore and MemAE runs.
+
+## 7. Licensing and citation
+
+- Original project code and documentation: [MIT License](LICENSE).
+- MVTec AD dataset: separate CC BY-NC-SA 4.0 terms; not included or relicensed here.
+- Third-party packages and pretrained weights: retain and follow their respective licenses and notices.
+- Research methods: cite the original papers listed in [docs/references.md](docs/references.md).
+
+See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) before reuse or redistribution.
