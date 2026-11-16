@@ -109,3 +109,11 @@ Macro metrics are recorded in [results/tables/memae_macro.csv](results/tables/me
 - F1 thresholds and evaluation implementations were not established to be identical across these two runs. Treat AUROC/AP as the cleaner ranking comparisons; interpret F1 cautiously.
 - A post-hoc MemAE image-score ablation found maximum pixel error gave macro image AUROC 0.6967 and image AP 0.8535, compared with 0.6722 and 0.8415 for the original top-1%-mean score. This was exploratory and selected after inspecting test performance; it is not the primary reported MemAE result.
 - Model checkpoints, prediction maps and raw category artifacts are stored in the associated Google Drive experiment folders, not in Git. This repository contains concise result tables and experiment metadata only.
+
+
+## Experiment notebooks
+
+- [PatchCore Anomalib run record](notebooks/05_patchcore_anomalib_record.ipynb) — recorded settings, category metrics and interpretation for the completed Anomalib 2.7.0 run.
+- [MemAE experiment record](notebooks/06_memae_experiment_record.ipynb) — MemAE architecture, recorded configuration, category metrics and interpretation. The reusable memory autoencoder module is in `src/memae/model.py`.
+
+The full Kaggle execution notebooks and raw run artifacts are retained separately in the experiment Google Drive backups. The notebooks in this repository are concise experiment records, not a claim that the full Kaggle execution notebooks have been embedded here.
