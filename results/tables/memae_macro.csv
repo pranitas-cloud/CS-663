@@ -1,0 +1,7 @@
+metric,macro_mean
+image_AUROC,0.672232
+image_AP,0.841480
+image_F1Score,0.425354
+pixel_AUROC,0.738080
+pixel_AP,0.144815
+pixel_F1Score,0.125190
