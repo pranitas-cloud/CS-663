@@ -27,3 +27,26 @@ def test_pca_notebooks_are_valid_and_code_cells_compile():
         combined_source = "\n".join(code_sources)
         assert "np.linalg.eigh" in combined_source
         assert "sklearn.decomposition" not in combined_source
+
+
+
+def test_every_notebook_has_valid_unique_cell_ids():
+    import re
+
+    repository_root = Path(__file__).resolve().parents[1]
+    notebook_paths = sorted((repository_root / "notebooks").glob("*.ipynb"))
+
+    assert notebook_paths
+
+    for notebook_path in notebook_paths:
+        notebook = json.loads(notebook_path.read_text())
+        cell_ids = [cell.get("id") for cell in notebook["cells"]]
+
+        assert all(
+            isinstance(cell_id, str) and re.fullmatch(r"[A-Za-z0-9_-]+", cell_id)
+            for cell_id in cell_ids
+        ), f"Invalid cell ID in {notebook_path.name}"
+
+        assert len(cell_ids) == len(set(cell_ids)), (
+            f"Duplicate cell IDs in {notebook_path.name}"
+        )
