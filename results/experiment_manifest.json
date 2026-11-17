@@ -145,7 +145,8 @@
         {
           "path": "results/tables/memae_categories.csv",
           "rows": 15,
-          "git_blob_sha": "c796f71a77ab975c5502fa15e99f62d54f0df83b"
+          "git_blob_sha": "d281f83671bf9cd33f5bfb2aa31461337eed6c03",
+          "note": "Normalized to rectangular CSV; only one category F1 value is retained and its image/pixel mapping is unverified."
         },
         {
           "path": "results/tables/memae_macro.csv",
