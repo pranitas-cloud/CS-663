@@ -138,7 +138,7 @@ GitHub Actions runs the same CPU test suite on pushes to `main`, pull requests, 
 
 ## 4. Run the repository baseline trainers
 
-The PCA implementations and their evaluation workflow are notebook-based; use `notebooks/02_pca_experiments.ipynb` and `notebooks/02b_patch_pca_experiments.ipynb`.
+The global and patch-wise PCA implementations are written directly in `notebooks/02_pca_experiments.ipynb` and `notebooks/02b_patch_pca_experiments.ipynb` using NumPy eigenvalue decomposition. They do not use a prebuilt PCA estimator. Both notebooks default to a one-category bottle smoke test. Set `RUN_ALL_CATEGORIES = True` in the setup cell to run all 15 MVTec categories and save per-category and macro metric tables under `results/tables/`; fitted models are saved under `experiments/pca/`.
 
 The convolutional autoencoder trainer uses the shared image preprocessing pipeline and only the normal training split:
 
