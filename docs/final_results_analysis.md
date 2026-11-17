@@ -16,7 +16,7 @@ The machine-readable cross-method table is `results/tables/method_comparison.csv
 
 ## Cross-method macro comparison
 
-All displayed macro values are arithmetic means of the 15 category-level values in the committed result tables.
+PatchCore's four macro metrics are reproducible as means of its 15 category rows. For MemAE, image AUROC, pixel AUROC and pixel AP reproduce from the category table; image AP and the separate image/pixel F1 macro values cannot all be independently reconstructed from the current category file. Runtime totals do sum to the recorded category runtimes.
 
 | Method | Image AUROC | Image AP | Image F1 | Pixel AUROC | Pixel AP | Pixel F1 | Runtime |
 |---|---:|---:|---:|---:|---:|---:|---:|
