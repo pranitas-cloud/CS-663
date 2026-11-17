@@ -20,12 +20,11 @@ jobs:
           cache-dependency-path: |
             requirements.txt
             requirements-dev.txt
-      - name: Install CPU PyTorch
+      - name: Install locked project environment
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -r requirements-pytorch-cpu.txt
-      - name: Install project dependencies
-        run: python -m pip install -r requirements-dev.txt
+          python -m pip install -r requirements-lock-ubuntu-py311.txt
+          python -m pip install --no-deps -e .
       - name: Capture resolved CI environment
         run: python -m pip freeze --exclude-editable | sort > requirements-lock-ubuntu-py311.txt
       - name: Upload resolved environment lock
