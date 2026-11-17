@@ -32,7 +32,7 @@ The category CSV contains the recorded image AUROC/F1 and pixel AUROC/F1 values.
 - Pixel threshold percentile: 99.5th
 - Seed: 42
 
-The MemAE category table contains per-category AUROC, pixel AP and F1 values transcribed from the saved experiment summary. Per-category image AP was not available in the displayed retained table and is therefore omitted. Macro averages for all six metrics are recorded separately.
+The committed MemAE category CSV contains per-category AUROC, pixel AP and F1 values. It does not contain an `image_AP` column, although the macro CSV records `image_AP = 0.841480`. The macro value is preserved as recorded, but it cannot be independently recomputed from the committed category CSV until the original per-category image AP values are recovered. Macro averages for all six metrics are recorded separately.
 
 ## Caveats
 
