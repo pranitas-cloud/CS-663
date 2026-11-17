@@ -50,6 +50,7 @@ cd CS-663
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
+python -m pip install -r requirements-pytorch-cpu.txt
 python -m pip install -r requirements-dev.txt
 python -m pip install -e .
 ```
@@ -60,15 +61,16 @@ For Windows PowerShell, activate the environment with:
 .venv\Scripts\Activate.ps1
 ```
 
-The requirements file constrains the supported dependency ranges but is not yet a fully resolved lock file. For a machine-specific CPU or CUDA build, install the matching PyTorch/Torchvision packages using the [official PyTorch installation selector](https://pytorch.org/get-started/locally/), then install the project requirements. The declared version ranges accept compatible PyTorch builds. GPU driver, CUDA runtime, and wheel compatibility depend on the machine. A fully resolved lock file is still part of the final verification checklist.
+The CPU environment is pinned to PyTorch 2.11.0 and Torchvision 0.26.0 through the official CPU wheel index. The CI workflow also exports its fully resolved Ubuntu/Python 3.11 package set as a workflow artifact. That lock is platform-specific; use it only for the matching Linux/Python environment. For other platforms, use the appropriate PyTorch wheel set and the version constraints in `requirements.txt`.
 
-The Anomalib PatchCore benchmark has a separate pinned dependency file:
+For the completed Anomalib PatchCore benchmark (PyTorch 2.11.0 + CUDA 13.0), install the matching framework wheels first:
 
 ```bash
+python -m pip install -r requirements-pytorch-cu130.txt
 python -m pip install -r requirements-anomalib.txt
 ```
 
-The full Kaggle notebook also installs Anomalib 2.7.0 in its setup cell. Do not install Anomalib into the baseline CPU CI environment unless running that benchmark.
+The Anomalib dependency file pins Anomalib 2.7.0, PyTorch 2.11.0 and Torchvision 0.26.0. These versions satisfy Anomalib 2.7.0's minimum framework requirements. GPU driver, CUDA runtime, wheel availability and hardware compatibility remain machine-specific. The full Kaggle notebook also installs Anomalib 2.7.0 in its setup cell. Do not install Anomalib into the baseline CPU environment unless running that benchmark.
 
 ## 2. Obtain and validate MVTec AD
 
