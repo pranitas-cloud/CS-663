@@ -25,5 +25,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements-dev.txt
           python -m pip install --no-deps -e .
+      - name: Compile Python sources
+        run: python -m compileall -q src scripts tests
       - name: Run tests
         run: python -m pytest -q
