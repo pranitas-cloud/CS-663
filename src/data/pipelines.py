@@ -30,7 +30,6 @@ from src.data.preprocessing import (
     resize_image,
 )
 
-
 class BasePreprocessor:
     """Common interface: ``pre(image, mask) -> (image_tensor, mask_tensor)``."""
 
@@ -70,7 +69,6 @@ class BasePreprocessor:
             "mask_resize": self.mask_mode,
         }
 
-
 class PCAPreprocessor(BasePreprocessor):
     """Grayscale [0, 1] images for global and patch-wise PCA.
 
@@ -87,9 +85,8 @@ class PCAPreprocessor(BasePreprocessor):
         self.grayscale = bool(grayscale)
         self.patch_size = int(patch_size)
         self.stride = int(stride)
-        patch_grid(self.image_size, self.patch_size, self.stride)  # validate tiling
+        patch_grid(self.image_size, self.patch_size, self.stride)
 
-    # global PCA -----------------------------------------------------------
     def flatten(self, images):
         """B x C x H x W -> B x (C*H*W), the data matrix for global PCA."""
         return images.reshape(images.shape[0], -1)
@@ -98,7 +95,6 @@ class PCAPreprocessor(BasePreprocessor):
         """B x (C*H*W) -> B x C x H x W."""
         return flat.reshape(flat.shape[0], self.channels, self.image_size, self.image_size)
 
-    # patch PCA ------------------------------------------------------------
     def patches(self, images):
         """B x C x H x W -> B x L x (C*p*p)."""
         return extract_patches(images, self.patch_size, self.stride)
@@ -114,7 +110,6 @@ class PCAPreprocessor(BasePreprocessor):
                  patch_size=self.patch_size, stride=self.stride,
                  patch_grid=patch_grid(self.image_size, self.patch_size, self.stride))
         return d
-
 
 class AutoencoderPreprocessor(BasePreprocessor):
     """RGB [0, 1] images for the convolutional autoencoder.
@@ -144,7 +139,6 @@ class AutoencoderPreprocessor(BasePreprocessor):
                  divisible_by=self.divisible_by)
         return d
 
-
 class PatchCorePreprocessor(BasePreprocessor):
     """RGB + ImageNet standardisation for the pretrained Wide-ResNet-50-2.
 
@@ -167,10 +161,6 @@ class PatchCorePreprocessor(BasePreprocessor):
         d.update(scaling="[0,1] then ImageNet mean/std", center_crop=None)
         return d
 
-
-# --------------------------------------------------------------------------
-# Config -> preprocessor -> dataset
-# --------------------------------------------------------------------------
 def build_preprocessor(method, cfg):
     """Create the preprocessor for ``method`` from a loaded config dict.
 
@@ -200,7 +190,6 @@ def build_preprocessor(method, cfg):
         return PatchCorePreprocessor(image_size=size, mask_mode=mask_mode)
     raise ValueError(f"Unknown method '{method}'. Use pca, autoencoder or patchcore.")
 
-
 class PreparedDataset(Dataset):
     """Wrap a raw ``MVTecDataset`` and apply a preprocessor.
 
@@ -213,7 +202,7 @@ class PreparedDataset(Dataset):
     def __init__(self, raw, preprocessor):
         self.raw = raw
         self.pre = preprocessor
-        self.samples = raw.samples  # keeps notebook code like train_ds.samples working
+        self.samples = raw.samples
 
     def __len__(self):
         return len(self.raw)
@@ -231,7 +220,6 @@ class PreparedDataset(Dataset):
             "orig_size": torch.tensor([h, w]),
         }
 
-
 def build_dataset(cfg, method, split, category=None):
     """Raw loader + method preprocessing for one category and split."""
     data = cfg["data"]
@@ -244,7 +232,6 @@ def build_dataset(cfg, method, split, category=None):
     )
     return PreparedDataset(raw, build_preprocessor(method, cfg))
 
-
 def stack_images(dataset):
     """Stack all images of a (train) dataset into one N x C x H x W tensor.
 
@@ -253,7 +240,6 @@ def stack_images(dataset):
     for final numbers.
     """
     return torch.stack([dataset[i]["image"] for i in range(len(dataset))])
-
 
 def load_config(path="configs/default.yaml"):
     import yaml
