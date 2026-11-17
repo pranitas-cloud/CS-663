@@ -1,25 +1,7 @@
 # References
 
-## Dataset
+1. CS 663 Digital Image Processing lecture material, PCA section. The mathematical formulation follows mean centering, covariance eigendirections, variance ordering, dimensionality reduction and reconstruction.
 
-Bergmann, P., Fauser, M., Sattlegger, D., and Steger, C. (2019). *MVTec AD — A Comprehensive Real-World Dataset for Unsupervised Anomaly Detection*. Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR).
+2. Bergmann, P., Fauser, M., Sattlegger, D., and Steger, C. (2019). MVTec AD — A Comprehensive Real-World Dataset for Unsupervised Anomaly Detection. CVPR. [Official dataset page](https://www.mvtec.com/research-teaching/datasets/mvtec-ad).
 
-- Official dataset and license: https://www.mvtec.com/research-teaching/datasets/mvtec-ad
-
-## Anomaly detection methods
-
-Roth, K., Pemula, L., Zepeda, J., Schölkopf, B., Brox, T., and Gehler, P. (2022). *Towards Total Recall in Industrial Anomaly Detection*. Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR).
-
-- Paper: https://openaccess.thecvf.com/content/CVPR2022/html/Roth_Towards_Total_Recall_in_Industrial_Anomaly_Detection_CVPR_2022_paper.html
-
-Gong, D., Liu, L., Le, V., Saha, B., Mansour, M. R., Venkatesh, S., and van den Hengel, A. (2019). *Memorizing Normality to Detect Anomaly: Memory-Augmented Deep Autoencoder for Unsupervised Anomaly Detection*. Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV), pp. 1705–1714. https://doi.org/10.1109/ICCV.2019.00179
-
-- Paper: https://openaccess.thecvf.com/content_ICCV_2019/html/Gong_Memorizing_Normality_to_Detect_Anomaly_Memory-Augmented_Deep_Autoencoder_for_Unsupervised_ICCV_2019_paper.html
-
-## Software
-
-- Anomalib documentation and source: https://github.com/open-edge-platform/anomalib
-- PyTorch: https://github.com/pytorch/pytorch
-- Torchvision: https://github.com/pytorch/vision
-
-Use the original papers when describing the methods. The repository's local PatchCore-style implementation and the Anomalib PatchCore benchmark must be distinguished in reports and result tables.
+3. Jolliffe, I. T., and Cadima, J. (2016). Principal component analysis: a review and recent developments. Philosophical Transactions of the Royal Society A, 374(2065). [DOI](https://doi.org/10.1098/rsta.2015.0202).

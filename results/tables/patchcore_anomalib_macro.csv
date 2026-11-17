@@ -1,5 +1,0 @@
-metric,macro_mean
-image_AUROC,0.982848
-image_F1Score,0.971479
-pixel_AUROC,0.980105
-pixel_F1Score,0.580585
