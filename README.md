@@ -61,7 +61,14 @@ For Windows PowerShell, activate the environment with:
 .venv\Scripts\Activate.ps1
 ```
 
-The CPU environment is pinned to PyTorch 2.11.0 and Torchvision 0.26.0 through the official CPU wheel index. The CI workflow also exports its fully resolved Ubuntu/Python 3.11 package set as a workflow artifact. That lock is platform-specific; use it only for the matching Linux/Python environment. For other platforms, use the appropriate PyTorch wheel set and the version constraints in `requirements.txt`.
+For an exact clean install on Ubuntu x86_64 with Python 3.11, use the resolved lock generated from the passing GitHub Actions run:
+
+```bash
+python -m pip install -r requirements-lock-ubuntu-py311.txt
+python -m pip install --no-deps -e .
+```
+
+That lock includes PyTorch 2.11.0+cpu and Torchvision 0.26.0+cpu, with all other resolved packages pinned to the versions used by CI. It is specific to the matching Linux/Python environment; do not use it as a macOS, Windows, or CUDA lock. The CI job regenerates the lock artifact when dependencies change. For other platforms, use the appropriate PyTorch wheel set and the version constraints in `requirements.txt`.
 
 For the completed Anomalib PatchCore benchmark (PyTorch 2.11.0 + CUDA 13.0), install the matching framework wheels first:
 
