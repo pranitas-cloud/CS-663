@@ -207,6 +207,9 @@ The completed run trained one model per category using normal training images, w
 
 Full data: [category metrics](results/tables/memae_categories.csv) · [macro metrics](results/tables/memae_macro.csv)
 
+
+**Cross-method comparison:** [consolidated metrics table](results/tables/method_comparison.csv) · [results and failure analysis](docs/final_results_analysis.md). The comparison keeps unrun PCA results and the unevaluated convolutional autoencoder blank rather than estimating scores.
+
 F1 thresholds and evaluation implementations were not established to be identical across the PatchCore and MemAE runs. Interpret F1 comparisons cautiously. The post-hoc MemAE image-score ablation is exploratory and is not the primary reported result.
 
 See [docs/completed_experiments_nov2026.md](docs/completed_experiments_nov2026.md) for the experiment record and [docs/methodology.md](docs/methodology.md) for methodology details.
@@ -231,4 +234,4 @@ The record notebooks are concise summaries. The two full Kaggle notebooks linked
 - Third-party packages and pretrained weights: retain and follow their respective licenses and notices.
 - Research methods: cite the original papers listed in [docs/references.md](docs/references.md).
 
-See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) before reuse or redistribution.
+See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), the [licensing audit](docs/licensing_audit.md), and the [experiment artifact audit](docs/artifact_audit.md) before reuse or redistribution. The machine-readable run and provenance summary is [results/experiment_manifest.json](results/experiment_manifest.json).
