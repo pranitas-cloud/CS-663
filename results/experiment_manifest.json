@@ -124,7 +124,7 @@
         "pixel_ap": 0.144815,
         "pixel_f1": 0.12519
       },
-      "metric_availability_note": "The retained MemAE category CSV includes pixel AP but omits image_AP. The macro CSV includes image_AP=0.841480, but that aggregate cannot be independently recomputed from the committed category CSV.",
+      "metric_availability_note": "The macro CSV records image_AP=0.841480, image_F1Score=0.425354 and pixel_F1Score=0.125190. The category CSV has no image_AP field and its original 10-column header had only 9 data fields per row; its one F1 value per category could not be assigned safely to image or pixel F1. The numeric values are retained under f1_score_field_unverified. The macro image AP/F1 values cannot be fully reconstructed until the original category JSON results are recovered.",
       "threshold_protocol": {
         "image_threshold": "99th percentile of held-out normal validation image scores",
         "pixel_threshold": "99.5th percentile of held-out normal validation error pixels",
@@ -213,7 +213,8 @@
   "audit_limitations": [
     "Google Drive artifacts were not independently inspected in this audit.",
     "A current notebook's environment-manifest generation code does not prove that the historical run's environment.json was preserved.",
-    "The MemAE image_AP macro value cannot be reconstructed from the committed category table because that table has no image_AP column.",
+    "The MemAE image_AP macro cannot be reconstructed from the committed category table because that table has no image_AP column.",
+    "The MemAE category F1 fields are ambiguous: the original header declared image and pixel F1, but each row contained one F1 value. The file now uses f1_score_field_unverified pending source JSON recovery.",
     "PatchCore AP values were not present in the retained tables and are not inferred."
   ]
 }
