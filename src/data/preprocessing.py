@@ -18,10 +18,6 @@ import torch.nn.functional as F
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_STD = (0.229, 0.224, 0.225)
 
-
-# --------------------------------------------------------------------------
-# Existing helpers (unchanged behaviour)
-# --------------------------------------------------------------------------
 def to_grayscale(images):
     """Convert BCHW RGB tensor to BCHW luminance."""
     if images.ndim != 4 or images.shape[1] != 3:
@@ -29,12 +25,10 @@ def to_grayscale(images):
     weights = images.new_tensor([0.2989, 0.5870, 0.1140]).view(1, 3, 1, 1)
     return (images * weights).sum(dim=1, keepdim=True)
 
-
 def resize_map(anomaly_map, size):
     if anomaly_map.ndim == 3:
         anomaly_map = anomaly_map.unsqueeze(1)
     return F.interpolate(anomaly_map.float(), size=size, mode="bilinear", align_corners=False)
-
 
 def normalize_map(anomaly_map, eps=1e-8):
     """Per-image min-max scaling, for visualisation only.
@@ -46,10 +40,6 @@ def normalize_map(anomaly_map, eps=1e-8):
     hi = anomaly_map.amax(dim=(-2, -1), keepdim=True)
     return (anomaly_map - lo) / (hi - lo + eps)
 
-
-# --------------------------------------------------------------------------
-# Raw array -> tensor
-# --------------------------------------------------------------------------
 def check_square(shape):
     """Raise if an (H, W, ...) shape is not square.
 
@@ -63,7 +53,6 @@ def check_square(shape):
         )
     return h
 
-
 def _as_hwc_uint8(image):
     """Return a contiguous H x W x C uint8 array with C in {1, 3}."""
     arr = np.asarray(image)
@@ -73,10 +62,9 @@ def _as_hwc_uint8(image):
         arr = arr[:, :, None]
     if arr.ndim != 3 or arr.shape[2] not in (1, 3, 4):
         raise ValueError(f"Unsupported image shape {arr.shape}.")
-    if arr.shape[2] == 4:  # drop alpha if it ever appears
+    if arr.shape[2] == 4:
         arr = arr[:, :, :3]
     return np.ascontiguousarray(arr)
-
 
 def image_to_tensor(image, grayscale=False):
     """Raw uint8 array -> float tensor C x H x W scaled to [0, 1].
@@ -95,7 +83,6 @@ def image_to_tensor(image, grayscale=False):
         t = t.expand(3, -1, -1).contiguous()
     return t
 
-
 def resize_image(image, size):
     """Resize C x H x W (or B x C x H x W) to ``size`` x ``size``.
 
@@ -113,20 +100,17 @@ def resize_image(image, size):
         ).clamp_(0.0, 1.0)
     return image.squeeze(0) if squeeze else image
 
-
 def normalize_imagenet(image):
     """Standardise a [0, 1] RGB tensor with ImageNet statistics (C x H x W or B x C x H x W)."""
     mean = image.new_tensor(IMAGENET_MEAN).view(-1, 1, 1)
     std = image.new_tensor(IMAGENET_STD).view(-1, 1, 1)
     return (image - mean) / std
 
-
 def denormalize_imagenet(image):
     """Inverse of ``normalize_imagenet`` (for plotting)."""
     mean = image.new_tensor(IMAGENET_MEAN).view(-1, 1, 1)
     std = image.new_tensor(IMAGENET_STD).view(-1, 1, 1)
     return image * std + mean
-
 
 def mask_to_tensor(mask, size, mode="nearest"):
     """Raw mask (or None for a normal sample) -> float tensor 1 x size x size in {0, 1}.
@@ -158,10 +142,6 @@ def mask_to_tensor(mask, size, mode="nearest"):
             raise ValueError(f"Unknown mask mode '{mode}'.")
     return t.squeeze(0)
 
-
-# --------------------------------------------------------------------------
-# Patch extraction (used by patch-wise PCA)
-# --------------------------------------------------------------------------
 def patch_grid(image_size, patch_size, stride):
     """Return (rows, cols) of the patch grid and verify full coverage.
 
@@ -178,15 +158,13 @@ def patch_grid(image_size, patch_size, stride):
     n = (image_size - patch_size) // stride + 1
     return n, n
 
-
 def extract_patches(images, patch_size, stride):
     """B x C x H x W -> B x L x (C * p * p) overlapping patches, row-major order."""
     if images.ndim != 4:
         raise ValueError("Expected a BCHW tensor.")
     patch_grid(images.shape[-1], patch_size, stride)
-    cols = F.unfold(images, kernel_size=patch_size, stride=stride)  # B x (C*p*p) x L
+    cols = F.unfold(images, kernel_size=patch_size, stride=stride)
     return cols.transpose(1, 2).contiguous()
-
 
 def fold_patches(patches, channels, image_size, patch_size, stride):
     """Inverse of ``extract_patches``; overlapping values are averaged.
