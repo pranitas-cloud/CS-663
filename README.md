@@ -171,7 +171,7 @@ To reproduce them:
 
 The MemAE notebook's Google Drive backup is optional. Training and evaluation run locally in the Kaggle session without a `GDRIVE_TOKEN`; Drive is only an optional backup/resume destination.
 
-The full notebooks record their hyperparameters, category-level metrics, thresholds, runtime and visualizations. Exact runtime and numerical reproducibility can vary with GPU model, library build, and nondeterministic accelerator kernels. Use the committed result tables as the original run record, not as a promise that every machine will reproduce every decimal.
+The full notebooks record their hyperparameters, category-level metrics, thresholds, runtime and visualizations. Each full-run notebook also writes an `environment.json` manifest into its output folder, capturing Python, PyTorch, Torchvision, CUDA, GPU and relevant package versions. Exact runtime and numerical reproducibility can vary with GPU model, library build, and nondeterministic accelerator kernels. Use the committed result tables as the original run record, not as a promise that every machine will reproduce every decimal.
 
 ## 6. Reported results
 
