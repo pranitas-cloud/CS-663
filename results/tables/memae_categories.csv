@@ -1,4 +1,4 @@
-category,runtime_minutes,test_images,normal_images,defective_images,image_AUROC,pixel_AUROC,pixel_AP,f1_score_field_unverified,pixel_F1Score
+category,runtime_minutes,test_images,normal_images,defective_images,image_AUROC,pixel_AUROC,pixel_AP,f1_score_field_unverified
 bottle,2.8,83,20,63,0.757937,0.692417,0.126125,0.076125
 cable,4.73,150,58,92,0.382684,0.582605,0.037837,0.009030
 capsule,4.42,132,23,109,0.581572,0.788887,0.064657,0.087820
