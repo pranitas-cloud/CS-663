@@ -23,16 +23,29 @@
 
 ## Results and reporting
 
+- [x] Consolidated cross-method metric table added with unavailable metrics left blank.
+- [x] Method comparison and category-level failure analysis documented; F1 threshold comparability caveat stated.
+- [x] MemAE macro image AP discrepancy recorded: macro value exists, per-category image_AP is absent from committed category table.
 - [x] Completed PatchCore/Anomalib and MemAE result tables committed.
 - [x] Macro and per-category tables linked from the README.
 - [x] Local PatchCore-style prototype distinguished from the completed Anomalib benchmark.
 - [x] PatchCore macro metrics in the record notebook reconciled with the committed macro table.
-- [ ] Verify reported metrics against original run artifacts and freeze the final report tables.
+- [ ] Recover original MemAE per-category image AP values and verify the recorded image_AP macro.
+- [x] Freeze a cross-method comparison against the committed macro tables; missing PatchCore AP is explicitly marked unavailable.
+- [x] Add machine-readable `results/experiment_manifest.json` with configuration, recorded environment fields, file row counts and Git blob identifiers.
+- [x] Add `docs/artifact_audit.md` distinguishing committed CSVs from expected external run artifacts.
+- [ ] Inspect the historical Google Drive/Kaggle exports and checksum the original checkpoints, per-image records, anomaly maps, visualisations and environment manifests.
 - [x] Add runtime environment-manifest generation to both full Kaggle notebooks.
 - [ ] Run fresh Kaggle sessions and preserve the generated manifests with the final experiment artifacts.
 
 ## Code and notebooks
 
+- [x] Final code and licensing audit added in `docs/licensing_audit.md`.
+- [x] Third-party notices expanded for ImageNet-derived pretrained-weight terms.
+- [x] `.gitignore` allows lightweight result CSVs and JSON manifests to be committed while continuing to ignore large artifacts.
+- [x] Convolutional autoencoder retained as a secondary training baseline; README and comparison document do not present it as a completed benchmark.
+- [ ] All contributors verify that no unlicensed external code, pretrained assets, or figures remain.
+- [ ] Verify the exact historical Wide ResNet-50-2 checkpoint variant and checksum, and confirm applicable ImageNet terms for intended use.
 - [x] Global PCA notebook rewritten with explicit mean-centering, sample-space eigendecomposition, projection, reconstruction and residual scoring.
 - [x] Patch PCA notebook rewritten with explicit patch sampling, covariance eigendecomposition, reconstruction and overlap-averaged residual maps.
 - [ ] Execute both rewritten PCA notebooks on MVTec data and verify their category-level result files.
