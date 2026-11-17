@@ -16,10 +16,10 @@
 - [x] Dataset structure validator added.
 - [x] CPU test workflow added to GitHub Actions.
 - [x] Dataset root made configurable instead of relying on a contributor-specific Drive path.
-- [ ] Run the complete CPU test suite successfully on a clean local clone and inspect the GitHub Actions result.
+- [x] Run Python compilation and all 19 synthetic-data tests successfully on a fresh Ubuntu/Python 3.11 GitHub Actions runner.
 - [ ] Run each full Kaggle notebook from a fresh session and record the resulting workflow URL.
-- [ ] Confirm that the optional MemAE Drive backup is not required to complete a run.
-- [ ] Generate and commit a fully resolved environment lock file after validating the clean installation on the target runtime.
+- [x] Confirm from the notebook control flow that MemAE training/evaluation does not require a Google Drive secret; Drive backup is optional.
+- [x] Generate and commit the resolved Ubuntu/Python 3.11 CPU lock; CI installs from that lock.
 
 ## Results and reporting
 
@@ -28,7 +28,8 @@
 - [x] Local PatchCore-style prototype distinguished from the completed Anomalib benchmark.
 - [x] PatchCore macro metrics in the record notebook reconciled with the committed macro table.
 - [ ] Verify reported metrics against original run artifacts and freeze the final report tables.
-- [ ] Record exact Python, PyTorch, Torchvision, CUDA, Anomalib and GPU versions for each completed run.
+- [x] Add runtime environment-manifest generation to both full Kaggle notebooks.
+- [ ] Run fresh Kaggle sessions and preserve the generated manifests with the final experiment artifacts.
 
 ## Code and notebooks
 
@@ -37,8 +38,8 @@
 - [x] Old account-specific Drive and Kaggle dataset paths removed from notebook code.
 - [x] Former notebook placeholders labelled as smoke checks rather than full experiment runs.
 - [x] Baseline autoencoder and local PatchCore training commands use the shared preprocessing pipeline.
-- [ ] Run syntax/import checks on a clean environment.
-- [ ] Execute the notebook cells in order on the target runtime and fix any runtime-specific issues.
+- [x] Run Python compileall and model/data smoke tests in the locked CI environment.
+- [ ] Execute both full Kaggle notebooks from fresh GPU sessions and fix any runtime-specific issues.
 - [ ] Check every final report/table against the primary experiment artifacts.
 
 ## Shared conventions
