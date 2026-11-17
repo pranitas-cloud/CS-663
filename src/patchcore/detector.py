@@ -1,10 +1,13 @@
-"""PatchCore-style training and inference pipeline."""
+"""PatchCore-style feature-memory training and inference pipeline."""
+
 import argparse
 from pathlib import Path
+
 import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
-from src.data.dataset import MVTecDataset
+
+from src.data.pipelines import build_dataset
 from src.patchcore.features import FeatureExtractor
 from src.patchcore.memory_bank import MemoryBank
 
@@ -25,29 +28,77 @@ class PatchCoreDetector:
 
     @torch.no_grad()
     def predict(self, images):
-        feats = self.extractor(images)
-        patch_scores = self.bank.query(feats)
-        b, n = patch_scores.shape
-        side = int(n ** 0.5)
-        if side * side != n:
+        features = self.extractor(images)
+        patch_scores = self.bank.query(features)
+        batch_size, patch_count = patch_scores.shape
+        side = int(patch_count ** 0.5)
+        if side * side != patch_count:
             raise ValueError("Feature grid must be square for current map reconstruction.")
-        amap = patch_scores.reshape(b, 1, side, side)
-        amap = F.interpolate(amap, size=images.shape[-2:], mode="bilinear", align_corners=False)
+        anomaly_map = patch_scores.reshape(batch_size, 1, side, side)
+        anomaly_map = F.interpolate(
+            anomaly_map,
+            size=images.shape[-2:],
+            mode="bilinear",
+            align_corners=False,
+        )
         image_scores = patch_scores.max(dim=1).values
-        return image_scores, amap
+        return image_scores, anomaly_map
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data-root", default="data/mvtec_anomaly_detection")
+    parser.add_argument("--category", default="bottle")
+    parser.add_argument("--image-size", type=int, default=256)
+    parser.add_argument("--max-samples", type=int, default=10000)
+    parser.add_argument("--batch-size", type=int, default=8)
+    parser.add_argument("--workers", type=int, default=2)
+    parser.add_argument("--output-dir", default="experiments/patchcore")
+    parser.add_argument("--no-pretrained", action="store_true")
+    return parser.parse_args()
+
 
 def main():
-    p = argparse.ArgumentParser()
-    p.add_argument("--data-root", default="data/mvtec_anomaly_detection")
-    p.add_argument("--category", default="bottle")
-    p.add_argument("--max-samples", type=int, default=10000)
-    p.add_argument("--batch-size", type=int, default=8)
-    args = p.parse_args()
-    train = DataLoader(MVTecDataset(args.data_root, args.category, "train"), batch_size=args.batch_size)
-    detector = PatchCoreDetector(args.max_samples).fit(train)
-    out = Path("experiments/patchcore"); out.mkdir(parents=True, exist_ok=True)
-    torch.save(detector.bank.features, out / f"{args.category}_memory.pt")
-    print(f"Saved memory bank with {len(detector.bank.features)} patch features.")
+    args = parse_args()
+    config = {
+        "seed": 42,
+        "data": {
+            "root": args.data_root,
+            "category": args.category,
+            "val_fraction": 0.10,
+            "image_size": args.image_size,
+            "mask_resize": "nearest",
+        },
+        "patchcore": {"image_size": args.image_size},
+    }
+    train_dataset = build_dataset(config, "patchcore", "train", args.category)
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=args.batch_size,
+        shuffle=False,
+        num_workers=args.workers,
+        pin_memory=torch.cuda.is_available(),
+    )
+    detector = PatchCoreDetector(
+        max_samples=args.max_samples,
+        pretrained=not args.no_pretrained,
+    ).fit(train_loader)
+
+    output_dir = Path(args.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = output_dir / f"{args.category}_memory.pt"
+    torch.save(
+        {
+            "features": detector.bank.features,
+            "category": args.category,
+            "image_size": args.image_size,
+            "max_samples": args.max_samples,
+            "pretrained": not args.no_pretrained,
+        },
+        output_path,
+    )
+    print(f"Saved memory bank with {len(detector.bank.features)} patch features: {output_path}")
+
 
 if __name__ == "__main__":
     main()
