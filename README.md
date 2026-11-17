@@ -1,7 +1,8 @@
 # Industrial Anomaly Detection
 
 **CS 663 — Digital Image Processing | Course project**
-
+AUTHORS:
+Aniruddha Deore [24B2182], Pranita Bodkhe[24B2144]
 This repository studies unsupervised industrial anomaly detection and pixel-level defect localization on the MVTec Anomaly Detection (MVTec AD) benchmark.
 
 ## Methods and experiment tracks
