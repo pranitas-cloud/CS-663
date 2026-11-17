@@ -34,7 +34,7 @@ PatchCore AP is explicitly unavailable because it was not present in the retaine
 
 The Anomalib PatchCore run has the strongest recorded ranking performance: image AUROC 0.982848 and pixel AUROC 0.980105. It uses ImageNet-pretrained Wide ResNet-50-2 intermediate features from `layer2` and `layer3`, a 10% coreset memory bank, and 9 nearest neighbours. The feature representation is useful because it compares local patterns in a pretrained visual feature space rather than relying only on raw pixel reconstruction.
 
-The result is strong across most categories. Image AUROC is at least 0.97 for 12 of the 15 categories. The lowest image AUROC values are toothbrush (0.916667), pill (0.947081), and screw (0.970691). The weakest pixel AUROC is wood (0.931554), followed by pill (0.981503) and transistor (0.973172); the latter values remain relatively high, so the main localization weakness is concentrated rather than universal.
+The result is strong across most categories. Image AUROC is at least 0.97 for 13 of the 15 categories. The lowest image AUROC values are toothbrush (0.916667), pill (0.947081), and screw (0.970691). The weakest pixel AUROC values are wood (0.931554), tile (0.955723), and transistor (0.973172); the other categories are above 0.98.
 
 Pixel F1 (0.580585 macro) is noticeably lower than pixel AUROC (0.980105). This is not contradictory: AUROC evaluates ranking over all thresholds, whereas F1 evaluates a single binary threshold. A strong ranking can still yield a modest F1 when the chosen threshold does not provide a good precision/recall balance, particularly with sparse defect pixels. The retained summary does not preserve enough threshold detail to diagnose the PatchCore F1 value further.
 
