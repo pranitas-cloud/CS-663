@@ -16,8 +16,8 @@
 - [x] Dataset structure validator added.
 - [x] CPU test workflow added to GitHub Actions.
 - [x] Dataset root made configurable instead of relying on a contributor-specific Drive path.
-- [x] Run Python compilation and all 19 synthetic-data tests successfully on a fresh Ubuntu/Python 3.11 GitHub Actions runner.
-- [ ] Run each full Kaggle notebook from a fresh session and record the resulting workflow URL.
+- [x] Run Python compilation and all 19 synthetic-data tests successfully on a fresh Ubuntu/Python 3.11 GitHub Actions runner (final validation: [run #51](https://github.com/pranitas-cloud/CS-663/actions/runs/44036602689)).
+- [ ] Run each full Kaggle notebook from a fresh session and record the resulting Kaggle execution URL.
 - [x] Confirm from the notebook control flow that MemAE training/evaluation does not require a Google Drive secret; Drive backup is optional.
 - [x] Generate and commit the resolved Ubuntu/Python 3.11 CPU lock; CI installs from that lock.
 
