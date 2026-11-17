@@ -1,4 +1,5 @@
-"""Pretrained CNN patch feature extraction (feature backbone only)."""
+"""Pretrained CNN patch feature extraction from ImageNet-normalized RGB tensors."""
+
 import torch
 import torch.nn.functional as F
 from torchvision.models import wide_resnet50_2, Wide_ResNet50_2_Weights
@@ -20,12 +21,12 @@ class FeatureExtractor:
 
     @torch.no_grad()
     def __call__(self, images):
+        if images.ndim != 4 or images.shape[1] != 3:
+            raise ValueError("Expected ImageNet-normalized RGB images with shape N x 3 x H x W.")
+        if not torch.is_floating_point(images):
+            raise TypeError("Expected floating-point image tensors.")
         self._features.clear()
-        x = images.to(self.device)
-        # ImageNet normalization is required for pretrained weights.
-        mean = x.new_tensor([0.485, 0.456, 0.406]).view(1, 3, 1, 1)
-        std = x.new_tensor([0.229, 0.224, 0.225]).view(1, 3, 1, 1)
-        self.model((x - mean) / std)
+        self.model(images.to(self.device))
         f2, f3 = self._features["layer2"], self._features["layer3"]
         f3 = F.interpolate(f3, size=f2.shape[-2:], mode="bilinear", align_corners=False)
         return torch.cat([f2, f3], dim=1)
