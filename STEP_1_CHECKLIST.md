@@ -16,7 +16,7 @@
 - [x] Dataset structure validator added.
 - [x] CPU test workflow added to GitHub Actions.
 - [x] Dataset root made configurable instead of relying on a contributor-specific Drive path.
-- [x] Run Python compilation and all 19 synthetic-data tests successfully on a fresh Ubuntu/Python 3.11 GitHub Actions runner (final validation: [run #51](https://github.com/pranitas-cloud/CS-663/actions/runs/44036602689)).
+- [x] Run Python compilation and all 21 tests successfully on a fresh Ubuntu/Python 3.11 GitHub Actions runner (latest validation: [run #80](https://github.com/pranitas-cloud/CS-663/actions/runs/44111815614)).
 - [ ] Run each full Kaggle notebook from a fresh session and record the resulting Kaggle execution URL.
 - [x] Confirm from the notebook control flow that MemAE training/evaluation does not require a Google Drive secret; Drive backup is optional.
 - [x] Generate and commit the resolved Ubuntu/Python 3.11 CPU lock; CI installs from that lock.
@@ -36,6 +36,7 @@
 - [x] Global PCA notebook rewritten with explicit mean-centering, sample-space eigendecomposition, projection, reconstruction and residual scoring.
 - [x] Patch PCA notebook rewritten with explicit patch sampling, covariance eigendecomposition, reconstruction and overlap-averaged residual maps.
 - [ ] Execute both rewritten PCA notebooks on MVTec data and verify their category-level result files.
+- [x] All 12 notebooks have valid, unique cell IDs and pass notebook JSON validation.
 - [x] Notebook outputs cleared and execution counters reset.
 - [x] Code-cell comments and stale saved output removed; explanatory documentation retained in Markdown/docstrings.
 - [x] Old account-specific Drive and Kaggle dataset paths removed from notebook code.
