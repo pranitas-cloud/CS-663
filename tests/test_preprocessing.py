@@ -28,11 +28,9 @@ from src.data.preprocessing import (
     normalize_imagenet,
 )
 
-
 def _save(path, arr, mode):
     path.parent.mkdir(parents=True, exist_ok=True)
     Image.fromarray(arr, mode=mode).save(path)
-
 
 def _make_category(root, name, size, mode, n_train=10):
     rng = np.random.default_rng(0)
@@ -51,7 +49,6 @@ def _make_category(root, name, size, mode, n_train=10):
         mask[size // 4: size // 2, size // 4: size // 2] = 255
         _save(base / "ground_truth" / "crack" / f"{i:03d}_mask.png", mask, "L")
 
-
 @pytest.fixture()
 def cfg(tmp_path):
     _make_category(tmp_path, "fake_rgb", 700, "RGB")
@@ -64,7 +61,6 @@ def cfg(tmp_path):
         "autoencoder": {"image_size": 256, "grayscale": False},
         "patchcore": {"image_size": 256},
     }
-
 
 @pytest.mark.parametrize("category", ["fake_rgb", "fake_gray"])
 def test_output_shapes_and_ranges(cfg, category):
@@ -80,17 +76,14 @@ def test_output_shapes_and_ranges(cfg, category):
     assert 0.0 <= pca_img.min() and pca_img.max() <= 1.0
     assert 0.0 <= ae_img.min() and ae_img.max() <= 1.0
 
-
 def test_gray_source_replicated_for_rgb_methods(cfg):
     ae = build_dataset(cfg, "autoencoder", "train", "fake_gray")[0]["image"]
     assert torch.allclose(ae[0], ae[1]) and torch.allclose(ae[1], ae[2])
-
 
 def test_gray_source_unchanged_for_pca():
     arr = np.random.default_rng(1).integers(0, 255, (256, 256), dtype=np.uint8)
     t = image_to_tensor(arr, grayscale=True)
     assert torch.allclose(t[0], torch.from_numpy(arr).float() / 255.0)
-
 
 def test_patchcore_uses_imagenet_stats(cfg):
     ds = build_dataset(cfg, "patchcore", "train", "fake_rgb")
@@ -99,11 +92,9 @@ def test_patchcore_uses_imagenet_stats(cfg):
     expected = normalize_imagenet(
         resize_image(image_to_tensor(raw_image, grayscale=False), 256)
     )
-    # Check the actual pipeline output against the documented ImageNet transform.
-    # Do not assert fixed extrema: anti-aliased resizing changes pixel extremes.
+
     assert torch.allclose(item["image"], expected, atol=1e-6)
     assert item["image"].min() < 0.0 and item["image"].max() > 0.0
-
 
 def test_masks_are_binary_and_normals_are_empty(cfg):
     ds = build_dataset(cfg, "pca", "test", "fake_rgb")
@@ -116,13 +107,11 @@ def test_masks_are_binary_and_normals_are_empty(cfg):
             assert item["mask"].sum() > 0
     assert tuple(ds[0]["orig_size"].tolist()) == (700, 700)
 
-
 def test_mask_max_mode_keeps_tiny_defect():
     mask = np.zeros((1024, 1024), np.uint8)
-    mask[501, 501] = 255  # one source pixel
+    mask[501, 501] = 255
     kept = mask_to_tensor(mask, 256, mode="max").sum()
     assert kept >= 1
-
 
 def test_loader_collates_mixed_batch(cfg):
     ds = build_dataset(cfg, "autoencoder", "test", "fake_rgb")
@@ -131,7 +120,6 @@ def test_loader_collates_mixed_batch(cfg):
     assert batch["mask"].shape == (4, 1, 256, 256)
     assert batch["label"].shape == (4,)
 
-
 def test_split_is_normal_only_and_disjoint(cfg):
     tr = build_dataset(cfg, "pca", "train", "fake_rgb")
     va = build_dataset(cfg, "pca", "val", "fake_rgb")
@@ -139,14 +127,12 @@ def test_split_is_normal_only_and_disjoint(cfg):
     assert all(s[2] == "good" for s in tr.samples + va.samples)
     assert stack_images(tr).shape == (len(tr), 1, 256, 256)
 
-
 def test_antialiasing_suppresses_aliasing():
     stripes = torch.zeros(1, 1024, 1024)
-    stripes[:, :, ::2] = 1.0  # finest possible pattern, mean 0.5
+    stripes[:, :, ::2] = 1.0
     out = resize_image(stripes, 256)
     assert abs(out.mean().item() - 0.5) < 0.02
-    assert out.std().item() < 0.05  # naive subsampling would give std 0.5
-
+    assert out.std().item() < 0.05
 
 def test_patch_roundtrip_is_identity():
     x = torch.rand(2, 1, 256, 256)
@@ -156,11 +142,9 @@ def test_patch_roundtrip_is_identity():
     back = fold_patches(p, 1, 256, 32, 16)
     assert torch.allclose(back, x, atol=1e-6)
 
-
 def test_patch_grid_rejects_non_tiling_stride():
     with pytest.raises(ValueError):
         patch_grid(256, 32, 20)
-
 
 def test_non_square_and_bad_dtype_rejected():
     pre = PatchCorePreprocessor(256)
@@ -169,11 +153,9 @@ def test_non_square_and_bad_dtype_rejected():
     with pytest.raises(ValueError):
         pre(np.zeros((256, 256, 3), np.float32))
 
-
 def test_autoencoder_rejects_indivisible_size():
     with pytest.raises(ValueError):
         AutoencoderPreprocessor(image_size=250)
-
 
 def test_pca_flatten_roundtrip_and_determinism(cfg):
     pre = build_preprocessor("pca", cfg)
