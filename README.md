@@ -10,10 +10,10 @@ The repository contains both project implementations and completed benchmark not
 
 | Track | Implementation | Status |
 |---|---|---|
-| Global PCA | `notebooks/02_pca_experiments.ipynb` | Notebook-based baseline |
-| Patch PCA | `notebooks/02b_patch_pca_experiments.ipynb` | Notebook-based baseline |
-| Convolutional autoencoder | Repository code and experiment notebooks | Baseline |
-| PatchCore-style prototype | `src/patchcore/` | Local implementation; uses random memory-bank sampling |
+| Global PCA | `notebooks/02_pca_experiments.ipynb` | Implementation ready; 15-category results pending |
+| Patch PCA | `notebooks/02b_patch_pca_experiments.ipynb` | Implementation ready; 15-category results pending |
+| Convolutional autoencoder | `src/autoencoder/` | Trainer implemented; no full benchmark results recorded |
+| PatchCore-style prototype | `src/patchcore/` | Prototype only; random memory-bank sampling, not the reported benchmark |
 | PatchCore benchmark | Anomalib 2.7.0 in the full Kaggle notebook | Completed 15-category run |
 | MemAE | Project implementation in `src/memae/` and full Kaggle notebook | Completed 15-category run |
 
