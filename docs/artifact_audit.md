@@ -12,14 +12,16 @@ The committed repository preserves the aggregate and per-category metric tables 
 |---|---|---|---:|
 | PatchCore | `results/tables/patchcore_anomalib_categories.csv` | Per-category runtime, image AUROC/F1, pixel AUROC/F1 | 15 |
 | PatchCore | `results/tables/patchcore_anomalib_macro.csv` | Four retained macro metrics | 4 |
-| MemAE | `results/tables/memae_categories.csv` | Per-category runtime, test counts, image AUROC, pixel AUROC/AP, image/pixel F1 | 15 |
+| MemAE | `results/tables/memae_categories.csv` | Per-category runtime, test counts, image AUROC, pixel AUROC/AP, one F1 field with unresolved image/pixel meaning | 15 |
 | MemAE | `results/tables/memae_macro.csv` | Six macro metrics | 6 |
 
 The metric tables are committed source records. Their current Git blob identifiers are included in `results/experiment_manifest.json` so that later changes can be distinguished from the audited versions.
 
-### Metric-table discrepancy to resolve
+### Metric-table discrepancies to resolve
 
-The MemAE macro table includes `image_AP = 0.841480`, but the committed 15-row MemAE category CSV does not contain an `image_AP` column. The macro value is retained as recorded, but it cannot be independently recomputed from the category CSV alone. The original per-category artifact or notebook output should be checked and, if present, the category CSV should be regenerated from that source.
+The MemAE macro table includes `image_AP = 0.841480`, but the committed 15-row MemAE category CSV does not contain an `image_AP` column. The macro value is retained as recorded, but it cannot be independently recomputed from the category CSV alone.
+
+The MemAE category CSV also had a 10-column header but only 9 data fields per row. The original pair of labels `image_F1Score` and `pixel_F1Score` could not be safely assigned to the single available F1 value. The table was normalized to one neutral column, `f1_score_field_unverified`, without changing the numeric row values. The mean of this field is 0.125190, which matches the macro file's pixel F1, but that numerical match is not sufficient evidence to relabel the field. The macro image F1 (0.425354) and pixel F1 (0.125190) are retained as reported in the macro file; the original category JSONs or notebook output are required to reconcile the category-level F1 scores.
 
 PatchCore's retained category and macro tables do not contain image AP or pixel AP. Both are reported as unavailable; no values are imputed.
 
@@ -106,7 +108,7 @@ When the run folders are available, preserve one immutable archive per method an
 3. Confirm the category-level CSV row count is 15 and that its macro values match the committed macro file.
 4. Preserve each original `environment.json`, model configuration, thresholds, per-image predictions and anomaly maps.
 5. Generate SHA-256 checksums for the exported ZIP and the key CSV/JSON files. Add those checksums to the experiment manifest.
-6. Reconcile MemAE `image_AP` at category level so the macro value can be reproduced.
+6. Reconcile MemAE `image_AP` and both F1 fields at category level from the original JSON results so the macro values can be reproduced.
 7. Keep MVTec image/mask data and image-containing visualisations out of Git unless the dataset terms permit the intended redistribution and the necessary attribution/licensing conditions are satisfied.
 
 ## 6. Convolutional autoencoder
