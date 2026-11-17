@@ -60,7 +60,7 @@ For Windows PowerShell, activate the environment with:
 .venv\Scripts\Activate.ps1
 ```
 
-The base requirements install PyTorch and the CPU-compatible package set resolved for your platform. For GPU runs, install the matching PyTorch/Torchvision build using the [official PyTorch installation selector](https://pytorch.org/get-started/locally/), then install the remaining project dependencies. GPU driver, CUDA runtime, and wheel compatibility depend on the machine.
+The requirements file constrains the supported dependency ranges but is not yet a fully resolved lock file. For a machine-specific CPU or CUDA build, install the matching PyTorch/Torchvision packages using the [official PyTorch installation selector](https://pytorch.org/get-started/locally/), then install the project requirements. The declared version ranges accept compatible PyTorch builds. GPU driver, CUDA runtime, and wheel compatibility depend on the machine. A fully resolved lock file is still part of the final verification checklist.
 
 The Anomalib PatchCore benchmark has a separate pinned dependency file:
 
