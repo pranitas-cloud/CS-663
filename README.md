@@ -19,7 +19,7 @@ The repository contains both project implementations and completed benchmark not
 
 **Important implementation distinction:** the reported PatchCore benchmark in the results tables was run using Anomalib 2.7.0. The separate `src/patchcore/` prototype is not an exact reproduction of Anomalib PatchCore: its current memory-bank sampler is random rather than greedy coreset selection. Do not attribute the Anomalib benchmark metrics to the local prototype.
 
-The project evaluates image-level anomaly detection and pixel-level localization. The experiment protocol uses defect-free training images; official test images and masks are held back for evaluation.
+The PCA baselines are implemented directly in the two notebooks using NumPy eigenvalue decomposition; no prebuilt PCA estimator is used. Scikit-learn is used only for evaluation metrics. The project evaluates image-level anomaly detection and pixel-level localization. The experiment protocol uses defect-free training images; official test images and masks are held back for evaluation.
 
 ## Repository layout
 
