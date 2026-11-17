@@ -25,6 +25,17 @@ Do not redistribute package source, pretrained weights, or third-party assets fr
 
 The Anomalib PatchCore experiment uses ImageNet-pretrained Wide ResNet-50-2 features. The weights are obtained through the Torchvision/Anomalib software stack at runtime and are not committed here. Review the terms that apply to the exact weights and their source before redistributing them.
 
+## ImageNet-pretrained backbone weights
+
+The completed PatchCore benchmark uses an ImageNet-pretrained Wide ResNet-50-2 backbone through Anomalib. The exact weight file/revision and checksum from the historical run are not retained in the repository, and the benchmark notebook does not commit the weights.
+
+TorchVision warns that pretrained weights can have their own licenses or terms derived from the training dataset and that the user is responsible for checking permission for the intended use. The ImageNet access terms state that the database is for non-commercial research and educational use. Review the applicable ImageNet access agreement and any weight-specific terms before redistributing weights or using them outside the permitted research/educational context. Do not assume the repository's MIT license applies to pretrained weights.
+
+- [TorchVision pretrained-weight guidance](https://docs.pytorch.org/vision/master/models.html)
+- [ImageNet terms of access](https://www.image-net.org/download)
+- [TorchVision license](https://github.com/pytorch/vision/blob/main/LICENSE)
+- [PyTorch license](https://github.com/pytorch/pytorch/blob/main/LICENSE)
+
 ## Research methods
 
 - PatchCore: Roth, K. et al. (2022). *Towards Total Recall in Industrial Anomaly Detection*. CVPR.
