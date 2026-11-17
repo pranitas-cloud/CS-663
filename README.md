@@ -1,46 +1,36 @@
 # Global PCA for Industrial Visual Anomaly Detection
 
-A standalone implementation of Global Principal Component Analysis for unsupervised anomaly detection on the MVTec AD benchmark.
+**CS 663 — Digital Image Processing | MVTec AD**
+
+A global principal component analysis baseline for unsupervised anomaly detection on the 15-category MVTec AD benchmark.
 
 ## Method
 
-The model learns a low-dimensional appearance subspace from defect-free training images. Test images are projected into this subspace and reconstructed. Squared reconstruction residuals form a pixel-level anomaly map. The image-level score is the average of the highest-scoring one percent of pixels.
+Each grayscale image is flattened into one feature vector. PCA is fitted on defect-free training images only. Test images are projected into the retained subspace and reconstructed; squared reconstruction residuals form pixel-level anomaly maps.
 
-The experiment compares three retained-variance targets (90%, 95%, 98%), raw and Gaussian-smoothed residual maps, and maximum versus top-one-percent image scoring. The PCA objective remains unchanged across these ablations.
+The executed experiment compares 90%, 95% and 98% retained variance, Gaussian smoothing (sigma 0 and 0.75), and max versus top-1% image scoring.
+
+## Full-run results
+
+The committed notebook contains the executed 15-category run (180 category/configuration rows). Best macro image AUROC was **0.8005** (98% variance, sigma 0.75, top-1% score). Best macro pixel AUROC was **0.8314** (98% variance, sigma 0.75); corresponding pixel AP was **0.2663** and AUPRO@30% FPR was **0.6466**. These results describe this experiment and are not state-of-the-art claims.
 
 ## Repository layout
 
-- `notebooks/global_pca.ipynb`: complete experiment and evaluation.
-- `src/pca/`: Global PCA implementation and linear algebra.
+- `notebooks/global_pca.ipynb`: executed experiment, metrics and visualization.
+- `src/pca/`: PCA and linear algebra implementation.
 - `src/data/`: MVTec loading and preprocessing.
-- `src/evaluation.py`: image, pixel and region-based metrics.
+- `src/evaluation.py`: evaluation metrics.
 - `docs/`: methodology and references.
-- `results/`: generated tables and visualizations.
+- `results/`: output location for generated tables and plots.
 
 ## Setup
 
-Install the dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-Download MVTec AD and place the extracted category folders under `data/mvtec_anomaly_detection/`. See [data/README.md](data/README.md).
-
-In Google Colab, mount Google Drive and set `DATA_ROOT` in the first notebook code cell to the directory containing the 15 category folders.
-
-## Run
-
-Open `notebooks/global_pca.ipynb` and run all cells. The default setting evaluates all 15 categories. Set `RUN_ALL_CATEGORIES = False` for a single-category smoke test.
-
-The notebook writes category-level and macro-average CSV files to `results/tables/` and saves a representative visualization to `results/plots/`.
+Install dependencies with `pip install -r requirements.txt`. Download MVTec AD and place its 15 category folders under `data/mvtec_anomaly_detection/`. The dataset is not included. In Colab, the notebook uses the configured Google Drive dataset path; set `MVTEC_DATA_ROOT` if needed.
 
 ## Evaluation protocol
 
-PCA is fitted on `train/good` only. A deterministic 90/10 split of those normal images provides the validation scores used to set the image threshold at the 95th percentile. The official test split and masks are used only for final evaluation.
+A deterministic validation split is taken from `train/good` only. The image threshold is the 95th percentile of normal validation scores. Official test images and masks are reserved for final metrics.
 
-No benchmark numbers are claimed in this repository until the complete notebook has been run and its generated result tables have been reviewed.
+## License
 
-## License and dataset terms
-
-The source code is distributed under the repository license. MVTec AD is a separately licensed dataset; its CC BY-NC-SA 4.0 terms apply to the data, not the code. Do not upload raw dataset images or masks to GitHub.
+The code is distributed under this repository's license. MVTec AD has separate CC BY-NC-SA 4.0 terms. Do not upload dataset images or masks.
