@@ -24,6 +24,10 @@ experiments/**/*
 !experiments/**/.gitkeep
 results/**/*
 !results/**/.gitkeep
+!results/tables/
+!results/tables/*.csv
+!results/tables/*.json
+!results/*.json
 
 *.pt
 *.pth
