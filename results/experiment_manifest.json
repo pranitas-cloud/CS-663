@@ -1,0 +1,219 @@
+{
+  "schema_version": 1,
+  "project": "CS-663 Industrial Anomaly Detection",
+  "prepared_on": "2026-11-17",
+  "dataset": {
+    "name": "MVTec AD",
+    "categories": 15,
+    "license": "CC BY-NC-SA 4.0",
+    "raw_dataset_committed": false,
+    "official_source": "https://www.mvtec.com/research-teaching/datasets/mvtec-ad"
+  },
+  "completed_benchmarks": [
+    {
+      "method": "PatchCore",
+      "implementation": "Anomalib 2.7.0",
+      "status": "completed",
+      "categories_completed": 15,
+      "total_runtime_minutes": 38.99,
+      "mean_runtime_minutes": 2.5993,
+      "configuration": {
+        "backbone": "wide_resnet50_2",
+        "pretrained": true,
+        "feature_layers": [
+          "layer2",
+          "layer3"
+        ],
+        "coreset_sampling_ratio": 0.1,
+        "nearest_neighbors": 9,
+        "train_batch_size": 8,
+        "evaluation_batch_size": 8,
+        "num_workers": 0,
+        "seed": 42
+      },
+      "macro_metrics": {
+        "image_auroc": 0.982848,
+        "image_ap": null,
+        "image_f1": 0.971479,
+        "pixel_auroc": 0.980105,
+        "pixel_ap": null,
+        "pixel_f1": 0.580585
+      },
+      "metric_availability_note": "The retained PatchCore macro and category tables do not contain image AP or pixel AP. These values are intentionally null.",
+      "threshold_protocol": {
+        "description": "Anomalib Engine.test evaluator",
+        "exact_f1_threshold_values_retained": false,
+        "exact_threshold_calibration_protocol_retained": false
+      },
+      "environment": {
+        "recorded_in_experiment_notes": {
+          "anomalib": "2.7.0",
+          "pytorch": "2.11.0+cu130",
+          "gpu_count": 1
+        },
+        "not_retained_in_repository": [
+          "Python version",
+          "platform",
+          "Torchvision version",
+          "GPU model",
+          "driver/runtime details"
+        ],
+        "current_full_notebook_writes_environment_json": true,
+        "original_environment_json_verified": false,
+        "current_manifest_path_in_kaggle": "/kaggle/working/patchcore_runs_anomalib_2_7_0/environment.json"
+      },
+      "committed_metric_files": [
+        {
+          "path": "results/tables/patchcore_anomalib_categories.csv",
+          "rows": 15,
+          "git_blob_sha": "e963e244474082f605357e6b5d915e247f49e410"
+        },
+        {
+          "path": "results/tables/patchcore_anomalib_macro.csv",
+          "rows": 4,
+          "git_blob_sha": "dca4e26fdd33185d6eeca14ab106bc37d4497bdb"
+        }
+      ],
+      "external_artifacts": {
+        "kaggle_output_root": "/kaggle/working/patchcore_runs_anomalib_2_7_0",
+        "expected_files": [
+          "environment.json",
+          "<category>/test_results.json",
+          "<category>/Anomalib checkpoints and model outputs",
+          "all_categories_results.json",
+          "completed_categories.json",
+          "all_categories_metrics.csv",
+          "aggregate_summary.csv",
+          "failed_categories.json",
+          "PatchCore_MVTec_Kaggle_results.zip"
+        ],
+        "drive_location_recorded_in_repository": null,
+        "verification_status": "not_verified_from_available_repository_files",
+        "note": "The experiment record states that checkpoints, category predictions and visualizations were kept in Google Drive. The exact historical Drive folder and actual external files were not available for inspection."
+      }
+    },
+    {
+      "method": "MemAE",
+      "implementation": "Project implementation based on the memory-augmented reconstruction method",
+      "status": "completed",
+      "categories_completed": 15,
+      "total_runtime_minutes": 54.97,
+      "mean_runtime_minutes": 3.6647,
+      "configuration": {
+        "input_size": "256x256 RGB",
+        "memory_slots": 256,
+        "hard_shrinkage_threshold": 0.001,
+        "attention_temperature": 0.07,
+        "maximum_epochs": 40,
+        "early_stopping_patience": 8,
+        "batch_size": 16,
+        "evaluation_batch_size": 16,
+        "learning_rate": 0.001,
+        "weight_decay": 0.00001,
+        "validation_fraction": 0.1,
+        "image_threshold_percentile": 99,
+        "pixel_threshold_percentile": 99.5,
+        "image_score": "mean of largest 1% of reconstruction-error pixels",
+        "seed": 42
+      },
+      "macro_metrics": {
+        "image_auroc": 0.672232,
+        "image_ap": 0.84148,
+        "image_f1": 0.425354,
+        "pixel_auroc": 0.73808,
+        "pixel_ap": 0.144815,
+        "pixel_f1": 0.12519
+      },
+      "metric_availability_note": "The retained MemAE category CSV includes pixel AP but omits image_AP. The macro CSV includes image_AP=0.841480, but that aggregate cannot be independently recomputed from the committed category CSV.",
+      "threshold_protocol": {
+        "image_threshold": "99th percentile of held-out normal validation image scores",
+        "pixel_threshold": "99.5th percentile of held-out normal validation error pixels",
+        "validation_data": "held-out 10% of normal training images"
+      },
+      "environment": {
+        "exact_historical_environment_verified": false,
+        "notebook_install_configuration": {
+          "pytorch": "2.11.0",
+          "torchvision": "0.26.0",
+          "pytorch_wheel_index": "CUDA 13.0"
+        },
+        "current_full_notebook_writes_environment_json": true,
+        "original_environment_json_verified": false,
+        "current_manifest_path_in_kaggle": "/kaggle/working/memae_runs/environment.json"
+      },
+      "committed_metric_files": [
+        {
+          "path": "results/tables/memae_categories.csv",
+          "rows": 15,
+          "git_blob_sha": "c796f71a77ab975c5502fa15e99f62d54f0df83b"
+        },
+        {
+          "path": "results/tables/memae_macro.csv",
+          "rows": 6,
+          "git_blob_sha": "c224b529c31a5a279a9d70622541369341a1a5d9"
+        }
+      ],
+      "external_artifacts": {
+        "kaggle_output_root": "/kaggle/working/memae_runs",
+        "documented_drive_location": "gdrive:CS663Project/memae_runs",
+        "expected_files": [
+          "environment.json",
+          "categories/<category>/best_model.pt",
+          "categories/<category>/training_history.csv",
+          "categories/<category>/metrics.json",
+          "categories/<category>/calibration.json",
+          "categories/<category>/per_image_predictions.csv",
+          "categories/<category>/anomaly_maps.npz",
+          "visualizations/<category>_examples.png",
+          "metrics/all_categories_metrics.csv",
+          "metrics/aggregate_summary.csv",
+          "metrics/progress.json",
+          "metrics/failures.json"
+        ],
+        "verification_status": "documented_path_and_notebook_output_logic_found_actual_drive_files_not_verified"
+      }
+    }
+  ],
+  "implemented_but_not_completed": [
+    {
+      "method": "Global PCA",
+      "status": "implementation_rewritten_no_MVTec_evaluation_results_committed",
+      "notebook": "notebooks/02_pca_experiments.ipynb"
+    },
+    {
+      "method": "Patch-wise PCA",
+      "status": "implementation_rewritten_no_MVTec_evaluation_results_committed",
+      "notebook": "notebooks/02b_patch_pca_experiments.ipynb"
+    },
+    {
+      "method": "Convolutional autoencoder",
+      "status": "model_and_normal_only_training_checkpoint_trainer_present_no_evaluation_pipeline_or_benchmark",
+      "model": "src/autoencoder/model.py",
+      "trainer": "src/autoencoder/train.py",
+      "test": "tests/test_models.py"
+    }
+  ],
+  "repository_artifact_check": {
+    "committed": [
+      "Per-category and macro PatchCore metric CSVs",
+      "Per-category and macro MemAE metric CSVs",
+      "Method comparison CSV",
+      "Final results analysis document",
+      "Experiment and licensing documentation"
+    ],
+    "not_committed": [
+      "Raw MVTec AD images and masks",
+      "Original trained checkpoints",
+      "Per-image prediction records",
+      "Anomaly map archives",
+      "Original GPU environment.json files",
+      "Qualitative visualization PNGs"
+    ]
+  },
+  "audit_limitations": [
+    "Google Drive artifacts were not independently inspected in this audit.",
+    "A current notebook's environment-manifest generation code does not prove that the historical run's environment.json was preserved.",
+    "The MemAE image_AP macro value cannot be reconstructed from the committed category table because that table has no image_AP column.",
+    "PatchCore AP values were not present in the retained tables and are not inferred."
+  ]
+}
