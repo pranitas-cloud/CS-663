@@ -15,12 +15,13 @@ The resolved package versions are committed in [`requirements-lock-ubuntu-py311.
 
 ## Passing validation run
 
-The final validation run was [GitHub Actions run #51](https://github.com/pranitas-cloud/CS-663/actions/runs/44036602689), triggered by validation PR #2. It exercised the committed lock file and completed with:
+The original clean-install validation was [GitHub Actions run #51](https://github.com/pranitas-cloud/CS-663/actions/runs/44036602689), which completed with 19 passing tests. The latest validation is [GitHub Actions run #80](https://github.com/pranitas-cloud/CS-663/actions/runs/44111815614). It exercised the committed lock file and completed with:
 
 - Python compilation: success
-- Unit tests: **19 passed**
+- Unit tests: **21 passed**
 - Locked environment installation: success
 - Editable project package build: success
+- Notebook JSON and cell-ID validation across all 12 notebooks: success
 
 This is a CPU CI smoke test. It does not execute the full MVTec AD training benchmarks or certify GPU/Kaggle runtime behavior.
 
