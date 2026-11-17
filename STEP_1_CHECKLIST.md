@@ -33,6 +33,9 @@
 
 ## Code and notebooks
 
+- [x] Global PCA notebook rewritten with explicit mean-centering, sample-space eigendecomposition, projection, reconstruction and residual scoring.
+- [x] Patch PCA notebook rewritten with explicit patch sampling, covariance eigendecomposition, reconstruction and overlap-averaged residual maps.
+- [ ] Execute both rewritten PCA notebooks on MVTec data and verify their category-level result files.
 - [x] Notebook outputs cleared and execution counters reset.
 - [x] Code-cell comments and stale saved output removed; explanatory documentation retained in Markdown/docstrings.
 - [x] Old account-specific Drive and Kaggle dataset paths removed from notebook code.
