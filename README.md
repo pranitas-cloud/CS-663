@@ -10,8 +10,8 @@ The repository contains both project implementations and completed benchmark not
 
 | Track | Implementation | Status |
 |---|---|---|
-| Global PCA | Repository code and experiment notebooks | Baseline |
-| Patch PCA | Repository code and experiment notebooks | Baseline |
+| Global PCA | `notebooks/02_pca_experiments.ipynb` | Notebook-based baseline |
+| Patch PCA | `notebooks/02b_patch_pca_experiments.ipynb` | Notebook-based baseline |
 | Convolutional autoencoder | Repository code and experiment notebooks | Baseline |
 | PatchCore-style prototype | `src/patchcore/` | Local implementation; uses random memory-bank sampling |
 | PatchCore benchmark | Anomalib 2.7.0 in the full Kaggle notebook | Completed 15-category run |
@@ -32,9 +32,8 @@ notebooks/                Exploration, baseline, and full benchmark notebooks
 results/                  Committed result tables; generated artifacts are ignored
 scripts/                  Dataset validation utilities
 src/data/                 MVTec loading and preprocessing
-src/pca/                  Global and patch PCA components
-src/autoencoder/          Convolutional autoencoder baseline
-src/patchcore/            Local PatchCore-style prototype
+src/autoencoder/          Convolutional autoencoder model and trainer
+src/patchcore/            Local PatchCore-style prototype and memory-bank trainer
 src/memae/                Memory-augmented autoencoder model
 src/evaluation/           Evaluation metrics and visualization helpers
 src/analysis/             Defect-property and failure analysis
@@ -128,7 +127,25 @@ make validate-data
 
 GitHub Actions runs the same CPU test suite on pushes to `main`, pull requests, and manual dispatches. A green CI run validates the tested code paths; it does not mean that the 15-category GPU benchmarks have been re-run.
 
-## 4. Reproduce the full benchmark runs
+## 4. Run the repository baseline trainers
+
+The PCA implementations and their evaluation workflow are notebook-based; use `notebooks/02_pca_experiments.ipynb` and `notebooks/02b_patch_pca_experiments.ipynb`.
+
+The convolutional autoencoder trainer uses the shared image preprocessing pipeline and only the normal training split:
+
+```bash
+python -m src.autoencoder.train --data-root data/mvtec_anomaly_detection --category bottle --epochs 2
+```
+
+The local PatchCore-style prototype builds a random-subset feature memory bank from normal training images and saves it under `experiments/patchcore/`:
+
+```bash
+python -m src.patchcore.detector --data-root data/mvtec_anomaly_detection --category bottle --max-samples 5000
+```
+
+The local PatchCore-style command is a feature-memory training step, not a full Anomalib benchmark reproduction or an end-to-end evaluation command. It may download the ImageNet-pretrained Wide ResNet-50-2 weights on first use. The full reported PatchCore benchmark is reproduced with the Anomalib Kaggle notebook below.
+
+## 5. Reproduce the full benchmark runs
 
 The two completed 15-category runs are supplied as self-contained Kaggle notebooks:
 
@@ -147,7 +164,7 @@ The MemAE notebook's Google Drive backup is optional. Training and evaluation ru
 
 The full notebooks record their hyperparameters, category-level metrics, thresholds, runtime and visualizations. Exact runtime and numerical reproducibility can vary with GPU model, library build, and nondeterministic accelerator kernels. Use the committed result tables as the original run record, not as a promise that every machine will reproduce every decimal.
 
-## 5. Reported results
+## 6. Reported results
 
 ### PatchCore — Anomalib 2.7.0
 
@@ -183,20 +200,20 @@ F1 thresholds and evaluation implementations were not established to be identica
 
 See [docs/completed_experiments_nov2026.md](docs/completed_experiments_nov2026.md) for the experiment record and [docs/methodology.md](docs/methodology.md) for methodology details.
 
-## 6. Notebooks
+## 7. Notebooks
 
 - [01 — Dataset exploration](notebooks/01_dataset_exploration.ipynb)
 - [01b — Fast preprocessing audit](notebooks/01b_preprocessing_audit_fast.ipynb)
 - [02 — PCA experiments](notebooks/02_pca_experiments.ipynb)
 - [02b — Patch PCA experiments](notebooks/02b_patch_pca_experiments.ipynb)
-- [03 — Autoencoder experiments](notebooks/03_autoencoder_experiments.ipynb)
-- [04 — PatchCore experiment placeholder/prototype notebook](notebooks/04_patchcore_experiments.ipynb)
+- [03 — Autoencoder model smoke check](notebooks/03_autoencoder_experiments.ipynb)
+- [04 — Local PatchCore-style prototype smoke check](notebooks/04_patchcore_experiments.ipynb)
 - [05 — PatchCore Anomalib run record](notebooks/05_patchcore_anomalib_record.ipynb)
 - [06 — MemAE experiment record](notebooks/06_memae_experiment_record.ipynb)
 
 The record notebooks are concise summaries. The two full Kaggle notebooks linked above are the execution artifacts for the completed Anomalib PatchCore and MemAE runs.
 
-## 7. Licensing and citation
+## 8. Licensing and citation
 
 - Original project code and documentation: [MIT License](LICENSE).
 - MVTec AD dataset: separate CC BY-NC-SA 4.0 terms; not included or relicensed here.
