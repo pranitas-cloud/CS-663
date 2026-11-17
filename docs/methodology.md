@@ -5,10 +5,10 @@ Train on defect-free images only. At test time produce (1) an image anomaly scor
 
 ## Methods
 ### Global PCA
-Resize images to a fixed resolution, convert to grayscale, flatten, and fit a low-rank subspace using SVD. Reconstruct test images and use squared reconstruction residual as a pixel score. This is a deliberately simple baseline.
+Resize images to a fixed resolution, convert to grayscale and flatten each image into one feature vector. Subtract the mean calculated from normal training images. Since the pixel-space covariance matrix is too large at the working resolution, use the equivalent sample-space matrix X X^T and obtain its eigenvectors with NumPy's symmetric eigensolver. Map the selected eigenvectors back to pixel space to obtain the principal components. Reconstruct images from the retained components and use squared reconstruction residual as the pixel anomaly score. The implementation is written directly in the notebook and does not use a prebuilt PCA estimator.
 
 ### Patch PCA
-Extract overlapping patches from normal training images, fit a shared PCA subspace over flattened patches, and project patch reconstruction errors back to an image-sized score map. Patch size and stride are experimental factors.
+Extract overlapping patches from normal training images. Sample a reproducible subset of patches, subtract the training-patch mean, calculate the feature covariance matrix and obtain its eigenvectors with NumPy's symmetric eigensolver. Reconstruct each patch from the retained components. Project each patch's squared reconstruction residual back to its image location and average overlapping error contributions. Patch size, stride, retained variance and sample count are experimental factors. The implementation is written directly in the notebook and does not use a prebuilt PCA estimator.
 
 ### Convolutional autoencoder
 Train a compact convolutional encoder-decoder from scratch on normal images using pixelwise MSE. At inference, aggregate channelwise squared reconstruction residuals into an anomaly map. This baseline may reconstruct some defects well; document that limitation.
