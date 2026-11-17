@@ -10,7 +10,6 @@ import numpy as np
 from PIL import Image
 from torch.utils.data import Dataset
 
-
 class MVTecDataset(Dataset):
     """Load original images/masks for one category and split.
 
@@ -79,7 +78,6 @@ class MVTecDataset(Dataset):
     def __getitem__(self, index):
         image_path, mask_path, defect = self.samples[index]
 
-        # Read and copy the original pixel array; do not transform it.
         with Image.open(image_path) as im:
             image = np.array(im)
 
@@ -98,7 +96,6 @@ class MVTecDataset(Dataset):
             "image_path": str(image_path),
             "mask_path": str(mask_path) if mask_path is not None else None,
         }
-
 
 def available_categories(root):
     """List valid MVTec category directories under root."""
