@@ -4,28 +4,8 @@ data:
   category: bottle
   val_fraction: 0.10
   image_size: 256
-  grayscale: false
   mask_resize: max
 pca:
   image_size: 256
   grayscale: true
   n_components: 0.95
-  patch_size: 32
-  stride: 16
-autoencoder:
-  image_size: 256
-  grayscale: false
-  divisible_by: 32
-  epochs: 50
-  batch_size: 16
-  learning_rate: 0.001
-  latent_channels: 128
-patchcore:
-  backbone: wide_resnet50_2
-  pretrained: true
-  image_size: 256
-  memory_bank_max_samples: 10000
-  neighbours: 1
-evaluation:
-  threshold: null
-  output_dir: results
