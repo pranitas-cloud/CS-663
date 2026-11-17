@@ -31,7 +31,7 @@ data/                    Dataset instructions; raw MVTec data is not committed
 docs/                    Methodology, results, references and reproduction notes
 experiments/              Local run outputs (ignored by Git)
 notebooks/                Exploration, baseline, and full benchmark notebooks
-results/                  Committed result tables; generated artifacts are ignored
+results/                  Committed result tables/manifests; large generated artifacts are ignored
 scripts/                  Dataset validation utilities
 src/data/                 MVTec loading and preprocessing
 src/autoencoder/          Convolutional autoencoder model and trainer
