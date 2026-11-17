@@ -12,7 +12,10 @@ def read_csv(relative_path):
         headers = reader.fieldnames
 
     assert headers is not None
-    assert all(None not in row for row in rows)
+    assert all(
+        None not in row and all(value is not None for value in row.values())
+        for row in rows
+    )
     return headers, rows
 
 
