@@ -15,7 +15,7 @@ The resolved package versions are committed in [`requirements-lock-ubuntu-py311.
 
 ## Passing validation run
 
-The validation run that generated and exercised the locked environment completed with:
+The final validation run was [GitHub Actions run #51](https://github.com/pranitas-cloud/CS-663/actions/runs/44036602689), triggered by validation PR #2. It exercised the committed lock file and completed with:
 
 - Python compilation: success
 - Unit tests: **19 passed**
