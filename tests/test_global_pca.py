@@ -1,59 +1,125 @@
 import numpy as np
 import pytest
+
 from src.pca.global_pca import GlobalPCA
 
-def data(seed=4,n=32,shape=(7,7),rank=5):
-    r=np.random.default_rng(seed); d=np.prod(shape); q=np.linalg.qr(r.normal(size=(d,rank)))[0]
-    z=r.normal(size=(n,rank))*np.arange(rank,0,-1)
-    return (z@q.T+.4+1e-3*r.normal(size=(n,d))).reshape(n,*shape)
+
+def make_data(seed=4, sample_count=32, image_shape=(7, 7), rank=5):
+    rng = np.random.default_rng(seed)
+    feature_count = np.prod(image_shape)
+    basis = np.linalg.qr(rng.normal(size=(feature_count, rank)))[0]
+    coefficients = rng.normal(size=(sample_count, rank)) * np.arange(rank, 0, -1)
+    images = coefficients @ basis.T + 0.4
+    images += 1e-3 * rng.normal(size=images.shape)
+    return images.reshape(sample_count, *image_shape)
+
 
 @pytest.fixture
-def x(): return data()
+def images():
+    return make_data()
 
-def test_mean_covariance_and_rank(x):
-    m=GlobalPCA("all").fit(x); a=x.reshape(len(x),-1); c=(a-a.mean(0)).T@(a-a.mean(0))/len(x)
-    np.testing.assert_allclose(m.mean_,a.mean(0),atol=1e-12)
-    np.testing.assert_allclose(m.eigenvalues_all_,np.linalg.eigvalsh(c)[::-1][:m.rank_],rtol=1e-7)
-    assert m.rank_<=len(x)-1
-    assert m.total_variance_==pytest.approx(np.trace(c),rel=1e-8)
 
-@pytest.mark.parametrize("method",["svd","gram","covariance"])
-def test_three_routes_match(x,method):
-    a=GlobalPCA(5,"covariance").fit(x); b=GlobalPCA(5,method).fit(x)
-    np.testing.assert_allclose(a.explained_variance_,b.explained_variance_,rtol=1e-7)
-    np.testing.assert_allclose(a.components_.T@a.components_,b.components_.T@b.components_,atol=1e-7)
-    np.testing.assert_allclose(a.reconstruct(x),b.reconstruct(x),atol=1e-7)
+def test_mean_covariance_and_rank(images):
+    model = GlobalPCA("all").fit(images)
+    flat = images.reshape(len(images), -1)
+    centered = flat - flat.mean(axis=0)
+    covariance = centered.T @ centered / len(images)
 
-@pytest.mark.parametrize("method",["svd","gram","covariance"])
-def test_eigen_equation_and_orthonormality(x,method):
-    m=GlobalPCA(5,method).fit(x); a=x.reshape(len(x),-1); xc=a-a.mean(0); c=xc.T@xc/len(x)
-    for lam,v in zip(m.explained_variance_,m.components_): np.testing.assert_allclose(c@v,lam*v,atol=1e-8)
-    np.testing.assert_allclose(m.components_@m.components_.T,np.eye(5),atol=1e-8)
+    np.testing.assert_allclose(model.mean_, flat.mean(axis=0), atol=1e-12)
+    expected = np.linalg.eigvalsh(covariance)[::-1][:model.rank_]
+    np.testing.assert_allclose(model.eigenvalues_all_, expected, rtol=1e-7)
+    assert model.rank_ <= len(images) - 1
+    assert model.total_variance_ == pytest.approx(np.trace(covariance), rel=1e-8)
 
-def test_maps_scores_and_reconstruction(x):
-    m=GlobalPCA("all").fit(x); rec=m.reconstruct(x); scores,maps=m.predict(x)
-    assert rec.shape==x.shape and maps.shape==x.shape and scores.shape==(len(x),)
-    assert np.isfinite(maps).all() and maps.min()>=0
-    assert np.mean((x-rec)**2)<1e-8
 
-def test_mse_vs_k_and_truncate(x):
-    m=GlobalPCA(.99).fit(x); got=m.mse_vs_k(x)
-    expected=[np.mean((x-m.truncate(k).reconstruct(x))**2) for k in range(1,m.n_components_+1)]
-    np.testing.assert_allclose(got,expected,rtol=1e-7,atol=1e-10)
+@pytest.mark.parametrize("method", ["svd", "gram", "covariance"])
+def test_pca_methods_agree(images, method):
+    reference = GlobalPCA(5, "covariance").fit(images)
+    model = GlobalPCA(5, method).fit(images)
 
-def test_multichannel_maps():
-    x=np.random.default_rng(1).normal(size=(12,3,5,5)); m=GlobalPCA(.8).fit(x)
-    assert m.anomaly_map(x[:2]).shape==(2,5,5)
+    np.testing.assert_allclose(
+        reference.explained_variance_, model.explained_variance_, rtol=1e-7
+    )
+    np.testing.assert_allclose(
+        reference.components_.T @ reference.components_,
+        model.components_.T @ model.components_,
+        atol=1e-7,
+    )
+    np.testing.assert_allclose(
+        reference.reconstruct(images), model.reconstruct(images), atol=1e-7
+    )
 
-def test_save_load(tmp_path,x):
-    m=GlobalPCA(.9,"gram","abs",0).fit(x); p=tmp_path/"m.npz"; m.save(p,category="toy"); q=GlobalPCA.load(p)
-    np.testing.assert_allclose(m.reconstruct(x),q.reconstruct(x))
-    assert q.method=="gram" and q.residual=="abs" and q.ddof==0
 
-def test_errors(x):
-    with pytest.raises(ValueError): GlobalPCA(method="bad")
-    with pytest.raises(ValueError): GlobalPCA(ddof=2)
-    with pytest.raises(ValueError): GlobalPCA().fit(np.ones((1,4,4)))
-    with pytest.raises(ValueError): GlobalPCA().fit(np.ones((5,4,4)))
-    with pytest.raises(ValueError): GlobalPCA().fit(np.full((5,4,4),np.nan))
-    with pytest.raises(ValueError): GlobalPCA().fit(np.ones((5,4,4)))
+@pytest.mark.parametrize("method", ["svd", "gram", "covariance"])
+def test_eigenvectors_and_orthonormality(images, method):
+    model = GlobalPCA(5, method).fit(images)
+    flat = images.reshape(len(images), -1)
+    centered = flat - flat.mean(axis=0)
+    covariance = centered.T @ centered / len(images)
+
+    for eigenvalue, component in zip(
+        model.explained_variance_, model.components_
+    ):
+        np.testing.assert_allclose(
+            covariance @ component, eigenvalue * component, atol=1e-8
+        )
+
+    np.testing.assert_allclose(
+        model.components_ @ model.components_.T, np.eye(5), atol=1e-8
+    )
+
+
+def test_reconstruction_and_anomaly_maps(images):
+    model = GlobalPCA("all").fit(images)
+    reconstruction = model.reconstruct(images)
+    scores, maps = model.predict(images)
+
+    assert reconstruction.shape == images.shape
+    assert maps.shape == images.shape
+    assert scores.shape == (len(images),)
+    assert np.isfinite(maps).all()
+    assert maps.min() >= 0
+    assert np.mean((images - reconstruction) ** 2) < 1e-8
+
+
+def test_mse_vs_k(images):
+    model = GlobalPCA(0.99).fit(images)
+    actual = model.mse_vs_k(images)
+    expected = [
+        np.mean((images - model.truncate(k).reconstruct(images)) ** 2)
+        for k in range(1, model.n_components_ + 1)
+    ]
+
+    np.testing.assert_allclose(actual, expected, rtol=1e-7, atol=1e-10)
+
+
+def test_multichannel_anomaly_map():
+    images = np.random.default_rng(1).normal(size=(12, 3, 5, 5))
+    model = GlobalPCA(0.8).fit(images)
+
+    assert model.anomaly_map(images[:2]).shape == (2, 5, 5)
+
+
+def test_save_and_load(tmp_path, images):
+    model = GlobalPCA(0.9, "gram", "abs", 0).fit(images)
+    path = tmp_path / "model.npz"
+    model.save(path, category="toy")
+    loaded = GlobalPCA.load(path)
+
+    np.testing.assert_allclose(model.reconstruct(images), loaded.reconstruct(images))
+    assert loaded.method == "gram"
+    assert loaded.residual == "abs"
+    assert loaded.ddof == 0
+
+
+def test_invalid_inputs(images):
+    with pytest.raises(ValueError):
+        GlobalPCA(method="unknown")
+    with pytest.raises(ValueError):
+        GlobalPCA(ddof=2)
+    with pytest.raises(ValueError):
+        GlobalPCA().fit(np.ones((1, 4, 4)))
+    with pytest.raises(ValueError):
+        GlobalPCA().fit(np.ones((5, 4, 4)))
+    with pytest.raises(ValueError):
+        GlobalPCA().fit(np.full((5, 4, 4), np.nan))
