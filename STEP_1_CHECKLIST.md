@@ -25,7 +25,8 @@
 
 - [x] Consolidated cross-method metric table added with unavailable metrics left blank.
 - [x] Method comparison and category-level failure analysis documented; F1 threshold comparability caveat stated.
-- [x] MemAE macro image AP discrepancy recorded: macro value exists, per-category image_AP is absent from committed category table.
+- [x] MemAE metric-table integrity audited: category rows had fewer values than headers; ambiguous F1 field neutral-labelled and macro-only image AP/F1 caveats documented.
+- [x] Automated result-table tests added for rectangular rows, reproducible AUC/AP means and runtime totals.
 - [x] Completed PatchCore/Anomalib and MemAE result tables committed.
 - [x] Macro and per-category tables linked from the README.
 - [x] Local PatchCore-style prototype distinguished from the completed Anomalib benchmark.
