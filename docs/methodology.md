@@ -1,31 +1,52 @@
 # Methodology
 
+## Objective
+
+Evaluate Global Principal Component Analysis (PCA) as an unsupervised reconstruction-based anomaly detector on the 15-category MVTec AD dataset.
+
+## Preprocessing and data split
+
+- Resize images to 256 × 256 and convert RGB images to grayscale in [0, 1].
+- Flatten each image into a 65,536-dimensional feature vector.
+- Split only normal train/good images deterministically into 90% training and 10% validation.
+- Fit PCA using the training split only. Use validation images only to calibrate the image-level threshold.
+- Evaluate on the official test split and its ground-truth masks.
+- Resize binary masks with max pooling to preserve small defect regions.
+
 ## Global PCA
 
-Each preprocessed image is represented as one flattened grayscale vector. The training mean is subtracted before computing principal directions using economy SVD of the centered sample matrix.
+Let x be a flattened image, μ the mean training image, and Vₖ the first k principal directions. The reconstruction is
 
-For a retained basis (V_k), an image (x) is projected and reconstructed:
+$$
+z = V_k^T(x-\mu), \qquad \hat{x} = \mu + V_k z.
+$$
 
-[
-z=V_k^T(x-mu), qquad hat{x}=mu+V_kz.
-]
+The pixel anomaly map is the squared reconstruction residual, reshaped to image dimensions:
 
-The pixel anomaly map is the squared reconstruction residual, ((x-hat{x})^2).
+$$
+A(i,j) = (x(i,j)-\hat{x}(i,j))^2.
+$$
 
-## Data protocol
+The implementation computes the PCA basis using economy SVD of the centred training matrix. The experiment retains enough components to explain 90%, 95%, or 98% of training variance.
 
-Images are resized to 256 × 256 and converted to grayscale in [0,1]. PCA is fitted using only normal `train/good` images. A deterministic 90/10 split of those images is used for fitting and normal-only threshold calibration. The image threshold is the 95th percentile of validation scores. Official test images and masks are used only for final evaluation.
+## Experimental factors
 
-Masks are binarized and downsampled using max pooling to preserve small defect regions.
+| Factor | Values |
+|---|---|
+| Retained variance | 90%, 95%, 98% |
+| Gaussian smoothing sigma | 0, 0.75 |
+| Image-level score | Maximum residual, mean of top 1% residuals |
+| Categories | All 15 MVTec AD categories |
 
-## Ablations
+This gives 12 configurations per category and 180 category/configuration evaluations.
 
-- Retained variance: 90%, 95%, 98%.
-- Residual smoothing: sigma 0 and 0.75.
-- Image scoring: maximum and mean of the top 1% residual pixels.
+## Evaluation
 
-## Metrics
+- Image AUROC and image average precision evaluate image-level ranking.
+- Image precision, recall, and F1 use a threshold set to the 95th percentile of normal validation image scores.
+- Pixel AUROC and pixel average precision evaluate pixel-level anomaly ranking.
+- AUPRO is integrated up to 30% pixel false-positive rate using connected components in the ground-truth masks.
 
-Image AUROC and average precision measure image ranking. Pixel AUROC and average precision measure pixel ranking. Image precision, recall and F1 use the validation-derived threshold. AUPRO is evaluated up to 30% pixel false-positive rate using a quantile-spaced threshold grid.
+## Limitations
 
-Global PCA is position-sensitive and may struggle with local texture changes and object misalignment.
+Global PCA uses one position-dependent subspace per category. Flattening does not model local texture or semantic structure explicitly. Small defects may have little influence on the global representation, while normal texture variation or misalignment can produce large residuals. Reconstruction error is an anomaly signal, not a defect-specific classifier.
